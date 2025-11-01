@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "@heroui/link";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 
 import { title } from "@/components/primitives";
+import { useAuthStore } from "@/stores/auth.store";
 import DefaultLayout from "@/layouts/default";
 
 export default function RegisterPage() {
@@ -13,6 +15,8 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const register = useAuthStore((state) => state.register);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,13 +38,20 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      // eslint-disable-next-line no-console
-      console.log("Register attempt:", { name, email, password });
+    try {
+      await register(email, password, name || undefined);
+
+      // After successful registration, redirect to home
+      navigate("/", { replace: true });
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again.",
+      );
+    } finally {
       setIsLoading(false);
-      // Add your registration logic here
-    }, 1000);
+    }
   };
 
   return (

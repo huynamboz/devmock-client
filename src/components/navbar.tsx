@@ -1,3 +1,11 @@
+import {
+  LogOut,
+  Github,
+  Twitter,
+  MessageCircle,
+  Heart,
+  Search,
+} from "lucide-react";
 import { Button } from "@heroui/button";
 import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
@@ -16,16 +24,17 @@ import clsx from "clsx";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import {
-  TwitterIcon,
-  GithubIcon,
-  DiscordIcon,
-  HeartFilledIcon,
-  SearchIcon,
-} from "@/components/icons";
-import { Logo } from "@/components/icons";
+import { useAuthStore } from "@/stores/auth.store";
 
 export const Navbar = () => {
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   const searchInput = (
     <Input
       aria-label="Search"
@@ -41,7 +50,10 @@ export const Navbar = () => {
       labelPlacement="outside"
       placeholder="Search..."
       startContent={
-        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+        <Search
+          className="text-base text-default-400 pointer-events-none flex-shrink-0"
+          size={16}
+        />
       }
       type="search"
     />
@@ -56,7 +68,6 @@ export const Navbar = () => {
             color="foreground"
             href="/"
           >
-            <Logo />
             <p className="font-bold text-inherit">ACME</p>
           </Link>
         </NavbarBrand>
@@ -84,23 +95,38 @@ export const Navbar = () => {
       >
         <NavbarItem className="hidden sm:flex gap-2">
           <Link isExternal href={siteConfig.links.twitter} title="Twitter">
-            <TwitterIcon className="text-default-500" />
+            <Twitter className="text-default-500" size={20} />
           </Link>
           <Link isExternal href={siteConfig.links.discord} title="Discord">
-            <DiscordIcon className="text-default-500" />
+            <MessageCircle className="text-default-500" size={20} />
           </Link>
           <Link isExternal href={siteConfig.links.github} title="GitHub">
-            <GithubIcon className="text-default-500" />
+            <Github className="text-default-500" size={20} />
           </Link>
           <ThemeSwitch />
         </NavbarItem>
+        {isAuthenticated && user && (
+          <NavbarItem className="hidden sm:flex gap-2 items-center">
+            <span className="text-sm text-default-600">
+              {user.name || user.email}
+            </span>
+            <Button
+              className="text-sm font-normal text-default-600 bg-default-100"
+              startContent={<LogOut className="text-default-500" size={16} />}
+              variant="flat"
+              onPress={handleLogout}
+            >
+              Logout
+            </Button>
+          </NavbarItem>
+        )}
         <NavbarItem className="hidden md:flex">
           <Button
             isExternal
             as={Link}
             className="text-sm font-normal text-default-600 bg-default-100"
             href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-danger" />}
+            startContent={<Heart className="text-danger" size={16} />}
             variant="flat"
           >
             Sponsor
@@ -110,14 +136,42 @@ export const Navbar = () => {
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
         <Link isExternal href={siteConfig.links.github}>
-          <GithubIcon className="text-default-500" />
+          <Github className="text-default-500" size={20} />
         </Link>
         <ThemeSwitch />
+        {isAuthenticated && user && (
+          <Button
+            isIconOnly
+            className="text-sm font-normal text-default-600 bg-default-100 min-w-fit px-2"
+            variant="flat"
+            onPress={handleLogout}
+          >
+            <LogOut className="text-default-500" size={20} />
+          </Button>
+        )}
         <NavbarMenuToggle />
       </NavbarContent>
 
       <NavbarMenu>
         {searchInput}
+        {isAuthenticated && user && (
+          <div className="mx-4 mt-2 mb-2 pb-2 border-b border-default-200">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-default-600">
+                {user.name || user.email}
+              </span>
+              <Button
+                className="text-sm font-normal text-default-600 bg-default-100"
+                size="sm"
+                startContent={<LogOut className="text-default-500" size={16} />}
+                variant="flat"
+                onPress={handleLogout}
+              >
+                Logout
+              </Button>
+            </div>
+          </div>
+        )}
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>

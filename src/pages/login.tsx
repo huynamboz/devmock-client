@@ -1,27 +1,42 @@
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "@heroui/link";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 
 import { title } from "@/components/primitives";
+import { useAuthStore } from "@/stores/auth.store";
 import DefaultLayout from "@/layouts/default";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const login = useAuthStore((state) => state.login);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      // eslint-disable-next-line no-console
-      console.log("Login attempt:", { email, password });
+    try {
+      await login(email, password);
+
+      // Redirect to the page user was trying to access, or home page
+      const from =
+        (location.state as { from?: Location })?.from?.pathname || "/";
+
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Login failed. Please try again.",
+      );
+    } finally {
       setIsLoading(false);
-      // Add your login logic here
-    }, 1000);
+    }
   };
 
   return (
@@ -36,6 +51,12 @@ export default function LoginPage() {
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                {error}
+              </div>
+            )}
+
             <Input
               isRequired
               classNames={{
