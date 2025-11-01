@@ -10,6 +10,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Input } from "@heroui/input";
+import { addToast } from "@heroui/toast";
 
 import { projectsService } from "@/services/projects.service";
 
@@ -41,6 +42,13 @@ export function CreateProjectModal({
 
       const newProject = await projectsService.create({
         name: projectName.trim(),
+      });
+
+      addToast({
+        title: "Project created successfully",
+        description: `Project "${newProject.name}" has been created.`,
+        color: "success",
+        variant: "flat",
       });
 
       setProjectName("");

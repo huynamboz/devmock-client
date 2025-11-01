@@ -13,6 +13,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Select, SelectItem, SelectSection } from "@heroui/select";
+import { addToast } from "@heroui/toast";
 
 import { resourcesService } from "@/services/resources.service";
 
@@ -258,6 +259,13 @@ export function CreateResourceModal({
       const createdResource = await resourcesService.create(projectId, {
         name: resourceName.trim(),
         ...(fieldsPayload && { fields: fieldsPayload }),
+      });
+
+      addToast({
+        title: "Resource created successfully",
+        description: `Resource "${createdResource.name}" has been created.`,
+        color: "success",
+        variant: "flat",
       });
 
       onSuccess?.(createdResource);

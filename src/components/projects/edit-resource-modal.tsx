@@ -13,6 +13,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Select, SelectItem, SelectSection } from "@heroui/select";
+import { addToast } from "@heroui/toast";
 
 import { resourcesService } from "@/services/resources.service";
 
@@ -302,6 +303,13 @@ export function EditResourceModal({
       const updatedResource = await resourcesService.update(resourceId, {
         name: resourceName.trim(),
         fields: fieldsPayload,
+      });
+
+      addToast({
+        title: "Resource updated successfully",
+        description: `Resource "${updatedResource.name}" has been updated.`,
+        color: "success",
+        variant: "flat",
       });
 
       onSuccess?.(updatedResource);

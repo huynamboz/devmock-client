@@ -24,6 +24,7 @@
     "@heroui/switch": "2.2.24",
     "@heroui/system": "2.4.23",
     "@heroui/theme": "2.4.23",
+    "@heroui/toast": "^2.0.17",
     "@heroui/use-theme": "2.1.10",
     "@react-aria/visually-hidden": "3.8.28",
     "@react-oauth/google": "^0.12.2",

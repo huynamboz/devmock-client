@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { useDisclosure } from "@heroui/modal";
+import { addToast } from "@heroui/toast";
 
 import { title } from "@/components/primitives";
 import { CreateProjectModal } from "@/components/projects";
@@ -65,8 +66,19 @@ export default function ProjectsPage() {
 
     try {
       setIsDeleting(id);
+      const project = projects.find((p) => p.id === id);
+
       await projectsService.delete(id);
       setProjects(projects.filter((p) => p.id !== id));
+
+      addToast({
+        title: "Project deleted successfully",
+        description: project
+          ? `Project "${project.name}" has been deleted.`
+          : "Project has been deleted.",
+        color: "success",
+        variant: "flat",
+      });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to delete project.",

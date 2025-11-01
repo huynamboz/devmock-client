@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { useDisclosure } from "@heroui/modal";
+import { addToast } from "@heroui/toast";
 
 import {
   CreateResourceModal,
@@ -56,7 +57,6 @@ export default function ProjectDetailPage() {
   } | null>(null);
 
   useEffect(() => {
-    console.log("id", id);
     loadProject();
   }, []);
 
@@ -90,7 +90,17 @@ export default function ProjectDetailPage() {
 
     try {
       setIsDeleting(true);
+      const projectName = project?.name || "Project";
+
       await projectsService.delete(id);
+
+      addToast({
+        title: "Project deleted successfully",
+        description: `Project "${projectName}" has been deleted.`,
+        color: "success",
+        variant: "flat",
+      });
+
       navigate("/projects", { replace: true });
     } catch (err) {
       setError(
@@ -110,7 +120,17 @@ export default function ProjectDetailPage() {
     try {
       setIsDeletingResource(true);
       setError("");
+      const resourceName = deletingResource.name;
+
       await resourcesService.delete(deletingResource.id);
+
+      addToast({
+        title: "Resource deleted successfully",
+        description: `Resource "${resourceName}" has been deleted.`,
+        color: "success",
+        variant: "flat",
+      });
+
       onDeleteResourceClose();
       setDeletingResource(null);
       // Refresh project to get updated resources list
@@ -195,8 +215,6 @@ export default function ProjectDetailPage() {
             }}
             onViewData={(resourceName) => {
               // TODO: Implement view data functionality
-              // eslint-disable-next-line no-console
-              console.log("View data for:", resourceName);
             }}
           />
 
@@ -219,10 +237,8 @@ export default function ProjectDetailPage() {
               setEditingResourceId(null);
               onEditResourceClose();
             }}
-            onSuccess={(resource) => {
+            onSuccess={() => {
               // Refresh project to get updated resources list
-              // eslint-disable-next-line no-console
-              console.log("Resource updated:", resource);
               loadProject();
             }}
           />
