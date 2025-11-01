@@ -59,9 +59,10 @@ export default function RegisterPage() {
       <section className="px-4 flex flex-auto flex-col items-center justify-center min-h-[60vh] h-full py-8 md:py-16 background-grid">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className={title({ size: "lg" })}>Sign Up</h1>
+            <h1 className={title({ size: "lg" })}>Create Account</h1>
             <p className="text-default-600 mt-2">
-              Create an account to get started.
+              Join MockAPI and start building with powerful mock APIs in
+              minutes.
             </p>
           </div>
 
@@ -157,7 +158,7 @@ export default function RegisterPage() {
               size="lg"
               type="submit"
             >
-              Sign Up
+              Create Account
             </Button>
 
             <div className="text-center">
@@ -167,7 +168,7 @@ export default function RegisterPage() {
                   className="text-primary hover:underline font-medium"
                   href="/login"
                 >
-                  Sign in
+                  Get Started
                 </Link>
               </p>
             </div>

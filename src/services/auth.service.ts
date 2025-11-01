@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 import type {
   AuthResponse,
+  GoogleLoginRequest,
   LoginRequest,
   RegisterRequest,
   User,
@@ -20,6 +21,14 @@ class AuthService {
    */
   async login(data: LoginRequest): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>("/auth/login", data);
+    return response.data;
+  }
+
+  /**
+   * Login with Google OAuth
+   */
+  async googleLogin(data: GoogleLoginRequest): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>("/auth/google", data);
     return response.data;
   }
 

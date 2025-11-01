@@ -39,3 +39,7 @@ export interface RefreshTokenResponse {
   refreshToken: string;
 }
 
+export interface GoogleLoginRequest {
+  idToken: string;
+}
+

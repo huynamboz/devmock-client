@@ -9,3 +9,7 @@ export const STORAGE_KEYS = {
   refreshToken: "refresh_token",
 } as const;
 
+// Google OAuth Config
+export const GOOGLE_CLIENT_ID =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+
