@@ -10,7 +10,11 @@ export default {
     "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'hero-pattern': 'url("/assets/images/hero-pattern.svg")',
+      },
+    },
   },
   darkMode: "class",
   plugins: [heroui()],

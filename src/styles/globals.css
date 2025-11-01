@@ -1,3 +1,26 @@
 @import "tailwindcss";
 
+@layer components {
+    .background-grid {
+      @apply bg-transparent bg-gradient-to-b from-slate-100 relative z-0
+    }
+    .background-grid--fade-top {
+      @apply bg-transparent bg-gradient-to-t from-slate-100 relative z-0
+    }
+    
+    .background-grid::before {
+        @apply  bg-hero-pattern w-full top-0 h-full absolute z-[-1];
+        content: '';
+        mask-image: linear-gradient(to top, transparent, black, black);
+      }
+    .background-grid--fade-top::before {
+        @apply  bg-hero-pattern w-full top-0 h-full absolute z-[-1];
+        content: '';
+        mask-image: linear-gradient(to bottom, transparent, black, black);
+      }
+      .content-wrapper {
+        @apply w-full max-xl:px-12 max-md:px-5 max-w-[1240px] relative;
+      }
+  }
+
 @config "../../tailwind.config.js"

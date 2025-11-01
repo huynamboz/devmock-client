@@ -26,7 +26,7 @@ export default function LoginPage() {
 
   return (
     <DefaultLayout>
-      <section className="flex flex-col items-center justify-center min-h-[60vh] py-8 md:py-10">
+      <section className="px-4 flex flex-auto flex-col items-center justify-center min-h-[60vh] h-full py-8 md:py-16 background-grid">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className={title({ size: "lg" })}>Login</h1>
@@ -39,7 +39,6 @@ export default function LoginPage() {
             <Input
               isRequired
               classNames={{
-                input: "text-large",
                 inputWrapper: "border-default-200",
               }}
               label="Email"
@@ -54,7 +53,6 @@ export default function LoginPage() {
             <Input
               isRequired
               classNames={{
-                input: "text-large",
                 inputWrapper: "border-default-200",
               }}
               label="Password"
