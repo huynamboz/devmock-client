@@ -32,7 +32,7 @@ function formatCompactDate(dateString: string): string {
 
 export function ProjectOverview({ project, onDelete }: ProjectOverviewProps) {
   const [copied, setCopied] = useState(false);
-  const baseUrl = `https://${project.id}.mockpilot.io/:resources`;
+  const baseUrl = `https://${project.id}.devmock.dev/:resources`;
 
   const handleCopy = async () => {
     try {
@@ -108,7 +108,7 @@ export function ProjectOverview({ project, onDelete }: ProjectOverviewProps) {
               {project.id}
             </span>
             <span className="text-default-700 dark:text-default-300">
-              .mockpilot.io/
+              .devmock.dev/
             </span>
             <span className="bg-primary/20 px-1.5 py-0.5 rounded font-bold">
               :resources

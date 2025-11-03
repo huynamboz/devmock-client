@@ -47,7 +47,7 @@ class ResourcesService {
     resourceId: string,
     data: UpdateResourceRequest,
   ): Promise<Resource> {
-    const response = await apiClient.patch<Resource>(
+    const response = await apiClient.put<Resource>(
       `/resources/${resourceId}`,
       data,
     );

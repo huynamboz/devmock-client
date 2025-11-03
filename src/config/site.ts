@@ -1,8 +1,9 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Vite + HeroUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "DevMock",
+  description:
+    "A lightweight mock backend + mock database built for Frontend Developers. Create data models, generate mock data, and call real REST APIs instantly while focusing entirely on UI development.",
   navItems: [
     {
       label: "Home",

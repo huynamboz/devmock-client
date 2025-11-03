@@ -68,7 +68,8 @@ export const Navbar = () => {
             color="foreground"
             href="/"
           >
-            <p className="font-bold text-inherit">MOCKPILOT</p>
+            <img src="/assets/images/logo.png" alt="Mockpilot" className="w-6 h-6" />
+            <p className="font-bold text-inherit">DevMock</p>
           </Link>
         </NavbarBrand>
         <div className="hidden lg:flex gap-4 justify-start ml-2">

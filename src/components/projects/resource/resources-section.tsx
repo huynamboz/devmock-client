@@ -42,7 +42,7 @@ export function ResourcesSection({
       return;
     }
 
-    const apiUrl = `https://${project.id}.mockpilot.io/:${resourceName}`;
+    const apiUrl = `https://${project.id}.devmock.dev/:${resourceName}`;
 
     try {
       await navigator.clipboard.writeText(apiUrl);

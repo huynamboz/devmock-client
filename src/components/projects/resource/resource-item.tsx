@@ -36,7 +36,7 @@ export function ResourceItem({
     resource.recordCount,
   );
   const resourceName = resource.name;
-  const apiUrl = `https://${projectId}.mockpilot.io/${resourceName}`;
+  const apiUrl = `https://${projectId}.devmock.dev/${resourceName}`;
   const recordCount = resource.recordCount || 0;
 
   const handleGenerateRecords = async (count: number) => {
@@ -173,11 +173,11 @@ export function ResourceItem({
         <div className="flex items-center gap-3 pt-2 border-t border-default-200">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-default-600">Records count</span>
+              <span className="text-xs text-default-600">Data generation</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-end gap-2">
               <Slider
-                className="flex-1"
+                className="max-w-[200px]"
                 color="success"
                 isDisabled={isGenerating}
                 maxValue={100}
