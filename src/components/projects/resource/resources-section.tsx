@@ -3,8 +3,10 @@ import type { Project } from "@/types/project";
 import { useState } from "react";
 import { Database, Plus } from "lucide-react";
 import { Button } from "@heroui/button";
+import { useDisclosure } from "@heroui/modal";
 
 import { ResourceItem } from "./resource-item";
+import { ViewDataModal } from "./view-data-modal";
 
 import { title } from "@/components/primitives";
 
@@ -26,7 +28,14 @@ export function ResourcesSection({
   onGenerateSuccess,
 }: ResourcesSectionProps) {
   const [copiedResourceId, setCopiedResourceId] = useState<string | null>(null);
-  const [sliderValues, setSliderValues] = useState<Record<string, number>>({});
+  const [viewingResourceName, setViewingResourceName] = useState<string | null>(
+    null,
+  );
+  const {
+    isOpen: isViewDataOpen,
+    onOpen: onViewDataOpen,
+    onClose: onViewDataClose,
+  } = useDisclosure();
 
   const handleCopyApiUrl = async (resourceName: string) => {
     if (!resourceName) {
@@ -46,13 +55,6 @@ export function ResourcesSection({
       // eslint-disable-next-line no-console
       console.error("Failed to copy:", err);
     }
-  };
-
-  const handleSliderValueChange = (resourceName: string, value: number) => {
-    setSliderValues((prev) => ({
-      ...prev,
-      [resourceName]: value,
-    }));
   };
 
   return (
@@ -95,23 +97,38 @@ export function ResourcesSection({
           </Button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-5">
           {project.resources.map((resource) => (
             <ResourceItem
               key={resource.id}
               isCopied={copiedResourceId === resource.name}
               projectId={project.id}
               resource={resource}
-              sliderValue={sliderValues[resource.name]}
               onCopy={handleCopyApiUrl}
               onDelete={onDelete}
               onEdit={onEdit}
               onGenerateSuccess={onGenerateSuccess}
-              onSliderValueChange={handleSliderValueChange}
-              onViewData={onViewData}
+              onViewData={(resourceName) => {
+                setViewingResourceName(resourceName);
+                onViewDataOpen();
+                onViewData?.(resourceName);
+              }}
             />
           ))}
         </div>
+      )}
+
+      {/* View Data Modal */}
+      {viewingResourceName && (
+        <ViewDataModal
+          isOpen={isViewDataOpen}
+          projectId={project.id}
+          resourceName={viewingResourceName}
+          onClose={() => {
+            setViewingResourceName(null);
+            onViewDataClose();
+          }}
+        />
       )}
     </div>
   );

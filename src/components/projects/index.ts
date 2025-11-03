@@ -1,11 +1,12 @@
 export { CreateProjectModal } from "./create-project-modal";
-export { CreateResourceModal } from "./create-resource-modal";
+export { CreateResourceModal } from "./resource/create-resource-modal";
 export { DeleteProjectModal } from "./delete-project-modal";
-export { DeleteResourceModal } from "./delete-resource-modal";
-export { EditResourceModal } from "./edit-resource-modal";
-export { GenerateRecordsModal } from "./generate-records-modal";
+export { DeleteResourceModal } from "./resource/delete-resource-modal";
+export { EditResourceModal } from "./resource/edit-resource-modal";
+export { GenerateRecordsModal } from "./resource/generate-records-modal";
 export { ProjectError } from "./project-error";
 export { ProjectOverview } from "./project-overview";
-export { ResourceItem } from "./resource-item";
-export { ResourcesSection } from "./resources-section";
+export { ResourceItem } from "./resource/resource-item";
+export { ResourcesSection } from "./resource/resources-section";
+export { ViewDataModal } from "./resource/view-data-modal";
 

@@ -25,15 +25,16 @@ export function ResourceItem({
   isCopied,
   projectId,
   resource,
-  sliderValue,
   onCopy,
   onDelete,
   onEdit,
   onGenerateSuccess,
-  onSliderValueChange,
   onViewData,
 }: ResourceItemProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [localSliderValue, setLocalSliderValue] = useState<number | undefined>(
+    resource.recordCount,
+  );
   const resourceName = resource.name;
   const apiUrl = `https://${projectId}.mockpilot.io/${resourceName}`;
   const recordCount = resource.recordCount || 0;
@@ -70,9 +71,6 @@ export function ResourceItem({
         variant: "flat",
       });
 
-      // Update slider value after successful generation
-      onSliderValueChange?.(resourceName, response.total);
-
       onGenerateSuccess?.();
     } catch (err) {
       const errorMessage =
@@ -90,32 +88,11 @@ export function ResourceItem({
   const handleSliderChange = (value: number | number[]) => {
     const newValue = Array.isArray(value) ? value[0] : (value as number);
 
-    onSliderValueChange?.(resourceName, newValue);
+    setLocalSliderValue(newValue);
   };
 
   const handleSliderChangeEnd = (value: number | number[]) => {
-    const targetCount = Array.isArray(value) ? value[0] : (value as number);
-
-    if (targetCount !== recordCount) {
-      if (targetCount > recordCount) {
-        // Generate more records
-        const generateCount = targetCount - recordCount;
-
-        handleGenerateRecords(generateCount);
-      } else {
-        // Note: Currently no API to delete multiple records
-        // So we can only generate, not reduce
-        // Reset to current count
-        onSliderValueChange?.(resourceName, recordCount);
-
-        addToast({
-          title: "Cannot reduce records",
-          description: "Please use 'View Data' to delete individual records.",
-          color: "warning",
-          variant: "flat",
-        });
-      }
-    }
+    handleGenerateRecords(value as number);
   };
 
   return (
@@ -135,9 +112,6 @@ export function ResourceItem({
                 <p className="font-mono truncate max-md:max-w-[200px]">
                   {apiUrl}
                 </p>
-                <span className="text-default-600 font-medium">
-                  {recordCount} records
-                </span>
               </div>
             </div>
           </div>
@@ -200,9 +174,6 @@ export function ResourceItem({
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-default-600">Records count</span>
-              <span className="text-xs text-default-500">
-                {recordCount} / 100
-              </span>
             </div>
             <div className="flex items-center gap-2">
               <Slider
@@ -213,12 +184,16 @@ export function ResourceItem({
                 minValue={0}
                 size="sm"
                 step={1}
-                value={sliderValue !== undefined ? sliderValue : recordCount}
+                value={
+                  localSliderValue !== undefined
+                    ? localSliderValue
+                    : recordCount
+                }
                 onChange={handleSliderChange}
                 onChangeEnd={handleSliderChangeEnd}
               />
               <span className="text-xs text-default-600 min-w-[50px] text-right">
-                {sliderValue !== undefined ? sliderValue : recordCount}
+                {localSliderValue !== undefined ? localSliderValue : recordCount}
               </span>
             </div>
           </div>
@@ -227,4 +202,3 @@ export function ResourceItem({
     </div>
   );
 }
-
