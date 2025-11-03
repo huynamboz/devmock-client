@@ -1,14 +1,6 @@
 import type { Project } from "@/types/project";
 
-import { useState } from "react";
-import {
-  Check,
-  Clock,
-  Code2,
-  Copy,
-  Link as LinkIcon,
-  Trash2,
-} from "lucide-react";
+import { Clock, Code2, Trash2 } from "lucide-react";
 import { Button } from "@heroui/button";
 
 import { title } from "@/components/primitives";
@@ -31,23 +23,6 @@ function formatCompactDate(dateString: string): string {
 }
 
 export function ProjectOverview({ project, onDelete }: ProjectOverviewProps) {
-  const [copied, setCopied] = useState(false);
-  const baseUrl = `https://${project.id}.devmock.dev/:resources`;
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(baseUrl);
-      setCopied(true);
-
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to copy:", err);
-    }
-  };
-
   return (
     <div className="bg-content1 border border-default-200 rounded-3xl p-6 md:p-8">
       {/* Header Section */}
@@ -95,38 +70,6 @@ export function ProjectOverview({ project, onDelete }: ProjectOverviewProps) {
               {formatCompactDate(project.updatedAt)}
             </span>
           </div>
-        </div>
-
-        {/* API URL */}
-        <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/20 rounded-lg">
-          <LinkIcon className="h-4 w-4 text-primary flex-shrink-0" />
-          <p className="flex-1 text-sm font-mono break-all text-primary font-semibold">
-            <span className="text-default-700 dark:text-default-300">
-              https://
-            </span>
-            <span className="bg-primary/20 px-1.5 py-0.5 rounded font-bold">
-              {project.id}
-            </span>
-            <span className="text-default-700 dark:text-default-300">
-              .devmock.dev/
-            </span>
-            <span className="bg-primary/20 px-1.5 py-0.5 rounded font-bold">
-              :resources
-            </span>
-          </p>
-          <Button
-            isIconOnly
-            color="primary"
-            size="sm"
-            variant="flat"
-            onPress={handleCopy}
-          >
-            {copied ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Copy className="h-3.5 w-3.5" />
-            )}
-          </Button>
         </div>
       </div>
     </div>

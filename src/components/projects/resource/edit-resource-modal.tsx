@@ -1,9 +1,8 @@
 import type { Resource } from "@/types/project";
 
 import { useEffect, useState } from "react";
-import { Check, Copy, Database, Edit, Eye, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@heroui/button";
-import { Checkbox } from "@heroui/checkbox";
 import { Input } from "@heroui/input";
 import {
   Modal,
@@ -15,87 +14,14 @@ import {
 import { Select, SelectItem, SelectSection } from "@heroui/select";
 import { addToast } from "@heroui/toast";
 
+import {
+  FIELD_TYPES,
+  FAKER_TYPES,
+  ResourceField,
+} from "./create-resource-modal";
+
 import { resourcesService } from "@/services/resources.service";
 import { validateResourceName } from "@/utils/resource-name-validation";
-
-interface ResourceFieldForm {
-  id: string;
-  name: string;
-  type: string;
-  defaultValue: string;
-  fakerType?: string;
-  required: boolean;
-}
-
-const FIELD_TYPES = [
-  { label: "Faker.js", value: "faker" },
-  { label: "Text", value: "text" },
-  { label: "Integer", value: "integer" },
-  { label: "Decimal", value: "decimal" },
-  { label: "Boolean", value: "boolean" },
-  { label: "Date", value: "date" },
-  { label: "Timestamp", value: "timestamp" },
-  { label: "UUID", value: "uuid" },
-  { label: "JSON", value: "json" },
-  { label: "Email", value: "email" },
-  { label: "URL", value: "url" },
-];
-
-const FAKER_TYPES = [
-  // Person
-  { label: "First Name", value: "person.firstName", category: "Person" },
-  { label: "Last Name", value: "person.lastName", category: "Person" },
-  { label: "Full Name", value: "person.fullName", category: "Person" },
-  { label: "Gender", value: "person.gender", category: "Person" },
-  { label: "Bio", value: "person.bio", category: "Person" },
-  { label: "Job Title", value: "person.jobTitle", category: "Person" },
-  // Internet
-  { label: "Email", value: "internet.email", category: "Internet" },
-  { label: "Username", value: "internet.userName", category: "Internet" },
-  { label: "URL", value: "internet.url", category: "Internet" },
-  { label: "Avatar", value: "internet.avatar", category: "Internet" },
-  { label: "IP Address", value: "internet.ip", category: "Internet" },
-  // Location
-  { label: "City", value: "location.city", category: "Location" },
-  { label: "Country", value: "location.country", category: "Location" },
-  { label: "Address", value: "location.streetAddress", category: "Location" },
-  { label: "Zip Code", value: "location.zipCode", category: "Location" },
-  // Finance
-  { label: "Amount", value: "finance.amount", category: "Finance" },
-  { label: "Currency", value: "finance.currencyName", category: "Finance" },
-  {
-    label: "Credit Card",
-    value: "finance.creditCardNumber",
-    category: "Finance",
-  },
-  // Company
-  { label: "Company Name", value: "company.name", category: "Company" },
-  { label: "Catch Phrase", value: "company.catchPhrase", category: "Company" },
-  // Phone
-  { label: "Phone Number", value: "phone.number", category: "Phone" },
-  // Date
-  { label: "Past Date", value: "date.past", category: "Date" },
-  { label: "Future Date", value: "date.future", category: "Date" },
-  { label: "Recent Date", value: "date.recent", category: "Date" },
-  // Lorem
-  { label: "Word", value: "lorem.word", category: "Lorem" },
-  { label: "Sentence", value: "lorem.sentence", category: "Lorem" },
-  { label: "Paragraph", value: "lorem.paragraph", category: "Lorem" },
-  // Image
-  { label: "Image URL", value: "image.url", category: "Image" },
-  // Commerce
-  {
-    label: "Product Name",
-    value: "commerce.productName",
-    category: "Commerce",
-  },
-  { label: "Price", value: "commerce.price", category: "Commerce" },
-  {
-    label: "Department",
-    value: "commerce.department",
-    category: "Commerce",
-  },
-];
 
 interface EditResourceModalProps {
   isOpen: boolean;
@@ -112,7 +38,7 @@ export function EditResourceModal({
 }: EditResourceModalProps) {
   const [resource, setResource] = useState<Resource | null>(null);
   const [resourceName, setResourceName] = useState("");
-  const [fields, setFields] = useState<ResourceFieldForm[]>([]);
+  const [fields, setFields] = useState<ResourceField[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -145,7 +71,7 @@ export function EditResourceModal({
 
       // Parse fields from API response (fields array)
       if (data.fields && Array.isArray(data.fields)) {
-        const parsedFields: ResourceFieldForm[] = data.fields.map((field) => ({
+        const parsedFields: ResourceField[] = data.fields.map((field) => ({
           id: field.id,
           name: field.name,
           type: field.type,
@@ -154,11 +80,20 @@ export function EditResourceModal({
           required: false, // API doesn't return required field yet
         }));
 
-        setFields(parsedFields);
+        setFields([
+          {
+            id: "system-id-field",
+            name: "id",
+            type: "uuid",
+            defaultValue: "{{uuid}}",
+            required: true,
+          },
+          ...parsedFields,
+        ]);
       } else if (data.data && typeof data.data === "object") {
         // Fallback: Parse from legacy data object format
         const schema = data.data as Record<string, unknown>;
-        const parsedFields: ResourceFieldForm[] = [];
+        const parsedFields: ResourceField[] = [];
 
         Object.entries(schema).forEach(([fieldName, fieldConfig]) => {
           if (typeof fieldConfig === "object" && fieldConfig !== null) {
@@ -181,7 +116,16 @@ export function EditResourceModal({
           }
         });
 
-        setFields(parsedFields);
+        setFields([
+          {
+            id: "system-id-field",
+            name: "id",
+            type: "uuid",
+            defaultValue: "{{uuid}}",
+            required: true,
+          },
+          ...parsedFields,
+        ]);
       }
     } catch (err) {
       setError(
@@ -199,7 +143,7 @@ export function EditResourceModal({
   };
 
   const handleAddField = () => {
-    const newField: ResourceFieldForm = {
+    const newField: ResourceField = {
       id: generateId(),
       name: "",
       type: "faker",
@@ -216,7 +160,7 @@ export function EditResourceModal({
 
   const handleFieldChange = (
     id: string,
-    key: keyof ResourceFieldForm,
+    key: keyof ResourceField,
     value: string | boolean,
   ) => {
     setFields(
@@ -291,8 +235,11 @@ export function EditResourceModal({
     }
 
     // Validate field names (if fields are added)
-    if (fields.length > 0) {
-      const emptyFields = fields.filter((field) => !field.name.trim());
+    // remove the id field from the fields array
+    const fieldsWithoutId = fields.filter((field) => field.name !== "id");
+
+    if (fieldsWithoutId.length > 0) {
+      const emptyFields = fieldsWithoutId.filter((field) => !field.name.trim());
 
       if (emptyFields.length > 0) {
         setError("All fields must have a name");
@@ -301,7 +248,9 @@ export function EditResourceModal({
       }
 
       // Check for duplicate field names
-      const fieldNames = fields.map((field) => field.name.trim().toLowerCase());
+      const fieldNames = fieldsWithoutId.map((field) =>
+        field.name.trim().toLowerCase(),
+      );
       const duplicates = fieldNames.filter(
         (name, index) => fieldNames.indexOf(name) !== index,
       );
@@ -313,7 +262,7 @@ export function EditResourceModal({
       }
 
       // Validate faker types
-      const fakerFieldsWithoutType = fields.filter(
+      const fakerFieldsWithoutType = fieldsWithoutId.filter(
         (field) => field.type === "faker" && !field.fakerType,
       );
 
@@ -328,9 +277,7 @@ export function EditResourceModal({
       setIsUpdating(true);
       setError("");
 
-      // Build fields array for API
-      const fieldsPayload = fields.map((field) => ({
-        id: field.id.startsWith("field-") ? undefined : field.id, // Only include ID if it's from API
+      const fieldsPayload = fieldsWithoutId.map((field) => ({
         name: field.name.trim(),
         type: field.type,
         fakerType: field.type === "faker" ? field.fakerType || null : null,
@@ -381,9 +328,6 @@ export function EditResourceModal({
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
           <h2 className="text-2xl font-semibold">Edit Resource</h2>
-          <p className="text-sm text-default-600 font-normal">
-            View and manage your resource schema
-          </p>
         </ModalHeader>
         <ModalBody className="">
           {isLoading ? (
@@ -396,40 +340,23 @@ export function EditResourceModal({
             </div>
           ) : (
             <>
-              {/* Resource Info */}
-              <div className="mb-6 p-4 bg-default-50 border border-default-200 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-primary/10 p-2">
-                    <Database className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-base mb-1">
-                      {resourceName || "Unnamed Resource"}
-                    </h3>
-                    <p className="text-xs text-default-500">
-                      Resource ID: <code className="text-xs">{resource?.id}</code>
-                    </p>
-                  </div>
-                </div>
+              {/* Resource Name */}
+              <div className="">
+                <Input
+                  description="Examples: users, user-posts, order_items"
+                  label="Resource Name"
+                  size="lg"
+                  value={resourceName}
+                  variant="bordered"
+                  onChange={(e) => {
+                    // Convert to lowercase automatically
+                    const value = e.target.value.toLowerCase();
+
+                    setResourceName(value);
+                    setError("");
+                  }}
+                />
               </div>
-
-                    {/* Resource Name */}
-                    <div className="mb-6">
-                      <Input
-                        description="Lowercase letters, numbers, hyphens (-) or underscores (_). Must start and end with alphanumeric. Max 50 characters. Examples: users, user-posts, order_items"
-                        label="Resource Name"
-                        size="lg"
-                        value={resourceName}
-                        variant="bordered"
-                        onChange={(e) => {
-                          // Convert to lowercase automatically
-                          const value = e.target.value.toLowerCase();
-
-                          setResourceName(value);
-                          setError("");
-                        }}
-                      />
-                    </div>
 
               {/* Schema Fields */}
               <div className="mb-4">
@@ -451,7 +378,8 @@ export function EditResourceModal({
                   </Button>
                 </div>
 
-                {fields.length === 0 ? (
+                {fields.length === 0 ||
+                (fields.length === 1 && fields[0]?.name === "id") ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-default-300 rounded-lg">
                     <div className="rounded-full bg-default-100 p-4 mb-3">
                       <Plus className="h-6 w-6 text-default-400" />
@@ -473,142 +401,162 @@ export function EditResourceModal({
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {fields.map((field, index) => (
-                      <div
-                        key={field.id}
-                        className="p-4 py-2 border-b border-default-200 rounded-lg"
-                      >
-                        <div className="flex items-start justify-between mb-4">
-                          {/* Required */}
-                          <Checkbox
-                            isSelected={field.required}
-                            size="md"
-                            onValueChange={(checked) => {
-                              handleFieldChange(field.id, "required", checked);
-                            }}
-                          >
-                            <span className="text-sm font-medium text-default-700 cursor-pointer">
-                              Required Field
-                            </span>
-                          </Checkbox>
-                          <Button
-                            isIconOnly
-                            color="danger"
-                            size="sm"
-                            variant="light"
-                            onPress={() => handleRemoveField(field.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                  <div className="space-y-4">
+                    {fields.map((field) => {
+                      const isIdField = field.name === "id";
+
+                      return (
+                        <div
+                          key={field.id}
+                          className="p-4 px-0 py-2 pb-4 border-b border-default-200 rounded-lg"
+                        >
+                          <div className="flex-1 items-center gap-1 flex max-md:flex-col w-full">
+                            <div className="max-md:w-full flex-auto grid grid-cols-3 max-md:grid-cols-1 gap-4">
+                              {/* Field Name */}
+                              <Input
+                                isDisabled={isIdField}
+                                label="Field Name"
+                                placeholder="e.g., name, email, price"
+                                size="md"
+                                value={field.name}
+                                variant="bordered"
+                                onChange={(e) => {
+                                  if (!isIdField) {
+                                    handleFieldChange(
+                                      field.id,
+                                      "name",
+                                      e.target.value,
+                                    );
+                                  }
+                                }}
+                              />
+
+                              {/* Field Type */}
+                              <Select
+                                isDisabled={isIdField}
+                                label="Field Type"
+                                placeholder="Select field type"
+                                selectedKeys={[field.type]}
+                                size="md"
+                                variant="bordered"
+                                onSelectionChange={(keys) => {
+                                  if (!isIdField) {
+                                    const selectedKey = Array.from(
+                                      keys,
+                                    )[0] as string;
+
+                                    if (selectedKey) {
+                                      handleFieldChange(
+                                        field.id,
+                                        "type",
+                                        selectedKey,
+                                      );
+                                    }
+                                  }
+                                }}
+                              >
+                                {FIELD_TYPES.map((type) => (
+                                  <SelectItem key={type.value}>
+                                    {type.label}
+                                  </SelectItem>
+                                ))}
+                              </Select>
+
+                              {/* Default Value or Faker Type */}
+                              {field.type === "faker" ? (
+                                <Select
+                                  isDisabled={isIdField}
+                                  label="Faker Type"
+                                  placeholder="Select faker type"
+                                  selectedKeys={
+                                    field.fakerType ? [field.fakerType] : []
+                                  }
+                                  size="md"
+                                  variant="bordered"
+                                  onSelectionChange={(keys) => {
+                                    if (!isIdField) {
+                                      const selectedKey = Array.from(
+                                        keys,
+                                      )[0] as string;
+
+                                      if (selectedKey) {
+                                        handleFieldChange(
+                                          field.id,
+                                          "fakerType",
+                                          selectedKey,
+                                        );
+                                      }
+                                    }
+                                  }}
+                                >
+                                  {Array.from(
+                                    new Set(FAKER_TYPES.map((f) => f.category)),
+                                  ).map((category) => {
+                                    const categoryItems = FAKER_TYPES.filter(
+                                      (item) => item.category === category,
+                                    );
+
+                                    return (
+                                      <SelectSection
+                                        key={category}
+                                        title={category}
+                                      >
+                                        {categoryItems.map((item) => (
+                                          <SelectItem key={item.value}>
+                                            {item.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectSection>
+                                    );
+                                  })}
+                                </Select>
+                              ) : (
+                                <Input
+                                  description="Default value for this field"
+                                  isDisabled={isIdField}
+                                  label="Default Value (Optional)"
+                                  placeholder="e.g., John Doe, 0, true"
+                                  size="md"
+                                  value={field.defaultValue}
+                                  variant="bordered"
+                                  onChange={(e) => {
+                                    if (!isIdField) {
+                                      handleFieldChange(
+                                        field.id,
+                                        "defaultValue",
+                                        e.target.value,
+                                      );
+                                    }
+                                  }}
+                                />
+                              )}
+                            </div>
+                            {!isIdField && (
+                              <Button
+                                isIconOnly
+                                color="danger"
+                                size="sm"
+                                variant="light"
+                                onPress={() => handleRemoveField(field.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
-
-                        <div className="grid grid-cols-3 max-md:grid-cols-1 gap-4">
-                          {/* Field Name */}
-                          <Input
-                            description="Property name (camelCase recommended)"
-                            label="Field Name"
-                            placeholder="e.g., name, email, price"
-                            size="md"
-                            value={field.name}
-                            variant="bordered"
-                            onChange={(e) => {
-                              handleFieldChange(field.id, "name", e.target.value);
-                            }}
-                          />
-
-                          {/* Field Type */}
-                          <Select
-                            label="Field Type"
-                            placeholder="Select field type"
-                            selectedKeys={[field.type]}
-                            size="md"
-                            variant="bordered"
-                            onSelectionChange={(keys) => {
-                              const selectedKey = Array.from(keys)[0] as string;
-
-                              if (selectedKey) {
-                                handleFieldChange(field.id, "type", selectedKey);
-                              }
-                            }}
-                          >
-                            {FIELD_TYPES.map((type) => (
-                              <SelectItem key={type.value}>{type.label}</SelectItem>
-                            ))}
-                          </Select>
-
-                          {/* Default Value or Faker Type */}
-                          {field.type === "faker" ? (
-                            <Select
-                              description="Select the type of fake data to generate"
-                              label="Faker Type"
-                              placeholder="Select faker type"
-                              selectedKeys={
-                                field.fakerType ? [field.fakerType] : []
-                              }
-                              size="md"
-                              variant="bordered"
-                              onSelectionChange={(keys) => {
-                                const selectedKey = Array.from(keys)[0] as string;
-
-                                if (selectedKey) {
-                                  handleFieldChange(
-                                    field.id,
-                                    "fakerType",
-                                    selectedKey,
-                                  );
-                                }
-                              }}
-                            >
-                              {Array.from(
-                                new Set(FAKER_TYPES.map((f) => f.category)),
-                              ).map((category) => {
-                                const categoryItems = FAKER_TYPES.filter(
-                                  (item) => item.category === category,
-                                );
-
-                                return (
-                                  <SelectSection key={category} title={category}>
-                                    {categoryItems.map((item) => (
-                                      <SelectItem key={item.value}>
-                                        {item.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectSection>
-                                );
-                              })}
-                            </Select>
-                          ) : (
-                            <Input
-                              description="Default value for this field"
-                              label="Default Value (Optional)"
-                              placeholder="e.g., John Doe, 0, true"
-                              size="md"
-                              value={field.defaultValue}
-                              variant="bordered"
-                              onChange={(e) => {
-                                handleFieldChange(
-                                  field.id,
-                                  "defaultValue",
-                                  e.target.value,
-                                );
-                              }}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
+                    <Button
+                      color="primary"
+                      size="sm"
+                      startContent={<Plus size={16} />}
+                      variant="flat"
+                      onPress={handleAddField}
+                    >
+                      Add Field
+                    </Button>
                   </div>
                 )}
-                <Button
-                  color="primary"
-                  size="sm"
-                  startContent={<Plus size={16} />}
-                  variant="flat"
-                  onPress={handleAddField}
-                >
-                  Add Field
-                </Button>
               </div>
             </>
           )}
@@ -619,8 +567,8 @@ export function EditResourceModal({
           </Button>
           <Button
             color="primary"
-            isLoading={isUpdating}
             isDisabled={isLoading}
+            isLoading={isUpdating}
             onPress={handleUpdate}
           >
             Save Changes
@@ -630,4 +578,3 @@ export function EditResourceModal({
     </Modal>
   );
 }
-

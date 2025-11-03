@@ -1,9 +1,10 @@
-import { apiClient } from "@/lib/api-client";
 import type {
   CreateResourceRequest,
   Resource,
   UpdateResourceRequest,
 } from "@/types/project";
+
+import { apiClient } from "@/lib/api-client";
 
 class ResourcesService {
   private readonly baseURL = "/projects";
@@ -11,7 +12,10 @@ class ResourcesService {
   /**
    * Create a new resource in a project
    */
-  async create(projectId: string, data: CreateResourceRequest): Promise<Resource> {
+  async create(
+    projectId: string,
+    data: CreateResourceRequest,
+  ): Promise<Resource> {
     const response = await apiClient.post<Resource>(
       `${this.baseURL}/${projectId}/resources`,
       data,
@@ -69,16 +73,15 @@ class ResourcesService {
     projectId: string,
     name: string,
   ): Promise<{ available: boolean; message?: string }> {
-    const response = await apiClient.get<{ available: boolean; message?: string }>(
-      `${this.baseURL}/${projectId}/resources/check-name`,
-      {
-        params: { name },
-      },
-    );
+    const response = await apiClient.get<{
+      available: boolean;
+      message?: string;
+    }>(`${this.baseURL}/${projectId}/resources/check-name`, {
+      params: { name },
+    });
 
     return response.data;
   }
 }
 
 export const resourcesService = new ResourcesService();
-

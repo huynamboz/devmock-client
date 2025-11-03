@@ -36,17 +36,15 @@ export function ResourceItem({
     resource.recordCount,
   );
   const resourceName = resource.name;
-  const apiUrl = `https://${projectId}.devmock.dev/${resourceName}`;
+  const apiUrl = `https://${projectId}.devmock.dev/`;
   const recordCount = resource.recordCount || 0;
 
   const handleGenerateRecords = async (count: number) => {
-    if (count === 0) {
-      return;
-    }
+    setIsGenerating(true);
 
     const maxGenerate = Math.min(100 - recordCount, count);
 
-    if (maxGenerate <= 0) {
+    if (maxGenerate <= 0 && count > 0) {
       addToast({
         title: "Cannot generate records",
         description: `Resource already has ${recordCount}/100 records. Maximum reached.`,
@@ -82,6 +80,8 @@ export function ResourceItem({
         color: "danger",
         variant: "flat",
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -111,28 +111,31 @@ export function ResourceItem({
               <div className="flex items-center gap-3 text-xs text-default-500">
                 <p className="font-mono truncate max-md:max-w-[200px]">
                   {apiUrl}
+                  <span className="bg-primary/20 text-primary px-1.5 py-0.5 rounded">
+                    {resourceName}
+                  </span>
                 </p>
+                <Button
+                  color="primary"
+                  size="sm"
+                  startContent={
+                    isCopied ? (
+                      <Check className="h-3.5 w-3.5" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )
+                  }
+                  variant="light"
+                  onPress={() => onCopy(resourceName)}
+                >
+                  {isCopied ? "Copied" : "Copy"}
+                </Button>
               </div>
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Button
-              color="primary"
-              size="sm"
-              startContent={
-                isCopied ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5" />
-                )
-              }
-              variant="light"
-              onPress={() => onCopy(resourceName)}
-            >
-              {isCopied ? "Copied" : "Copy"}
-            </Button>
             {onViewData && (
               <Button
                 color="default"
@@ -193,7 +196,9 @@ export function ResourceItem({
                 onChangeEnd={handleSliderChangeEnd}
               />
               <span className="text-xs text-default-600 min-w-[50px] text-right">
-                {localSliderValue !== undefined ? localSliderValue : recordCount}
+                {localSliderValue !== undefined
+                  ? localSliderValue
+                  : recordCount}
               </span>
             </div>
           </div>

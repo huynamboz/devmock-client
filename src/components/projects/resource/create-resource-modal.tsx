@@ -1,9 +1,9 @@
 import type { Resource } from "@/types/project";
 
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import Editor from "@monaco-editor/react";
+import { Code, Plus, Trash2, Database } from "lucide-react";
 import { Button } from "@heroui/button";
-import { Checkbox } from "@heroui/checkbox";
 import { Input } from "@heroui/input";
 import {
   Modal,
@@ -13,12 +13,13 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Select, SelectItem, SelectSection } from "@heroui/select";
+import { Tabs, Tab } from "@heroui/tabs";
 import { addToast } from "@heroui/toast";
 
 import { resourcesService } from "@/services/resources.service";
 import { validateResourceName } from "@/utils/resource-name-validation";
 
-interface ResourceField {
+export interface ResourceField {
   id: string;
   name: string;
   type: string;
@@ -42,18 +43,15 @@ interface ResourceField {
  * - url -> text with url validation
  * - faker -> uses fakerType to determine actual type
  */
-const FIELD_TYPES = [
-  { label: "Faker.js", value: "faker" },
-  { label: "Text", value: "text" },
-  { label: "Integer", value: "integer" },
-  { label: "Decimal", value: "decimal" },
+export const FIELD_TYPES = [
+  { label: "Text", value: "string" },
+  { label: "Number", value: "number" },
   { label: "Boolean", value: "boolean" },
   { label: "Date", value: "date" },
   { label: "Timestamp", value: "timestamp" },
+  { label: "JSON Object", value: "json" },
+  { label: "Faker.js", value: "faker" },
   { label: "UUID", value: "uuid" },
-  { label: "JSON", value: "json" },
-  { label: "Email", value: "email" },
-  { label: "URL", value: "url" },
 ];
 
 /**
@@ -62,22 +60,19 @@ const FIELD_TYPES = [
  */
 export const mapFieldTypeToSupabaseType = (fieldType: string): string => {
   const typeMap: Record<string, string> = {
-    text: "text",
-    integer: "integer",
-    decimal: "numeric",
+    string: "text",
+    number: "number",
     boolean: "boolean",
     date: "date",
     timestamp: "timestamptz",
     uuid: "uuid",
     json: "jsonb",
-    email: "text",
-    url: "text",
   };
 
   return typeMap[fieldType] || "text";
 };
 
-const FAKER_TYPES = [
+export const FAKER_TYPES = [
   // Person
   { label: "First Name", value: "person.firstName", category: "Person" },
   { label: "Last Name", value: "person.lastName", category: "Person" },
@@ -131,6 +126,14 @@ const FAKER_TYPES = [
     value: "commerce.department",
     category: "Commerce",
   },
+  // Number
+  { label: "Number", value: "number", category: "Number" },
+  { label: "Integer", value: "number.int", category: "Number" },
+  { label: "Float", value: "number.float", category: "Number" },
+  // Boolean
+  { label: "Boolean", value: "boolean", category: "Boolean" },
+  // UUID
+  { label: "UUID", value: "uuid", category: "UUID" },
 ];
 
 interface CreateResourceModalProps {
@@ -147,7 +150,44 @@ export function CreateResourceModal({
   onSuccess,
 }: CreateResourceModalProps) {
   const [resourceName, setResourceName] = useState("");
-  const [fields, setFields] = useState<ResourceField[]>([]);
+  const [mode, setMode] = useState<"schema" | "template">("schema");
+  const [fields, setFields] = useState<ResourceField[]>([
+    {
+      id: "system-id-field",
+      name: "id",
+      type: "uuid",
+      defaultValue: "{{uuid}}",
+      required: true,
+    },
+  ]);
+  const [jsonTemplate, setJsonTemplate] = useState<string>(`{
+  "id": "{{uuid}}",
+  "name": "{{person.fullName}}",
+  "email": "{{internet.email}}",
+  "age": "{{number}}",
+  "isActive": "{{boolean}}",
+  "posts": [
+    {
+      "id": "{{uuid}}",
+      "title": "{{lorem.sentence}}",
+      "content": "{{lorem.paragraph}}",
+      "createdAt": "{{date.recent}}"
+    }
+  ],
+  "comments": [
+    {
+      "id": "{{uuid}}",
+      "content": "{{lorem.paragraph}}",
+      "createdAt": "{{date.recent}}"
+    }
+  ],
+  "tags": [
+    "{{lorem.word}}",
+    "{{lorem.word}}",
+    "{{lorem.word}}"
+  ],
+  "createdAt": "{{date.recent}}"
+}`);
   const [error, setError] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
@@ -168,6 +208,13 @@ export function CreateResourceModal({
   };
 
   const handleRemoveField = (id: string) => {
+    // Don't allow removing "id" field
+    const field = fields.find((f) => f.id === id);
+
+    if (field?.name === "id") {
+      return;
+    }
+
     setFields(fields.filter((field) => field.id !== id));
   };
 
@@ -176,6 +223,13 @@ export function CreateResourceModal({
     key: keyof ResourceField,
     value: string | boolean,
   ) => {
+    // Don't allow changing "id" field
+    const field = fields.find((f) => f.id === id);
+
+    if (field?.name === "id") {
+      return;
+    }
+
     setFields(
       fields.map((field) => {
         if (field.id === id) {
@@ -211,35 +265,59 @@ export function CreateResourceModal({
 
     const trimmedName = resourceName.trim();
 
-    // Validate field names (if fields are added)
-    if (fields.length > 0) {
-      const emptyFields = fields.filter((field) => !field.name.trim());
+    // Validate based on mode
+    if (mode === "schema") {
+      // Validate field names (if fields are added)
+      if (fields.length > 0) {
+        const emptyFields = fields.filter((field) => !field.name.trim());
 
-      if (emptyFields.length > 0) {
-        setError("All fields must have a name");
+        if (emptyFields.length > 0) {
+          setError("All fields must have a name");
 
-        return;
+          return;
+        }
+
+        // Check for duplicate field names
+        const fieldNames = fields.map((field) =>
+          field.name.trim().toLowerCase(),
+        );
+        const duplicates = fieldNames.filter(
+          (name, index) => fieldNames.indexOf(name) !== index,
+        );
+
+        if (duplicates.length > 0) {
+          setError("Field names must be unique");
+
+          return;
+        }
+
+        // Validate faker types
+        const fakerFieldsWithoutType = fields.filter(
+          (field) => field.type === "faker" && !field.fakerType,
+        );
+
+        if (fakerFieldsWithoutType.length > 0) {
+          setError("Please select a faker type for all faker fields");
+
+          return;
+        }
       }
+    } else {
+      // Validate JSON template
+      try {
+        const parsed = JSON.parse(jsonTemplate);
 
-      // Check for duplicate field names
-      const fieldNames = fields.map((field) => field.name.trim().toLowerCase());
-      const duplicates = fieldNames.filter(
-        (name, index) => fieldNames.indexOf(name) !== index,
-      );
+        if (
+          typeof parsed !== "object" ||
+          parsed === null ||
+          Array.isArray(parsed)
+        ) {
+          setError("JSON template must be a valid object");
 
-      if (duplicates.length > 0) {
-        setError("Field names must be unique");
-
-        return;
-      }
-
-      // Validate faker types
-      const fakerFieldsWithoutType = fields.filter(
-        (field) => field.type === "faker" && !field.fakerType,
-      );
-
-      if (fakerFieldsWithoutType.length > 0) {
-        setError("Please select a faker type for all faker fields");
+          return;
+        }
+      } catch {
+        setError("Invalid JSON template. Please check your syntax.");
 
         return;
       }
@@ -248,17 +326,6 @@ export function CreateResourceModal({
     try {
       setIsCreating(true);
       setError("");
-
-      // Build fields array for API
-      const fieldsPayload =
-        fields.length > 0
-          ? fields.map((field) => ({
-              name: field.name.trim(),
-              type: field.type,
-              fakerType:
-                field.type === "faker" ? field.fakerType || null : null,
-            }))
-          : undefined;
 
       // Check name availability before creating
       const nameCheck = await resourcesService.checkNameAvailability(
@@ -275,11 +342,43 @@ export function CreateResourceModal({
         return;
       }
 
-      // Call API to create resource with fields
-      const createdResource = await resourcesService.create(projectId, {
+      // Build payload based on mode
+      const payload: {
+        name: string;
+        mode?: "schema" | "template";
+        fields?: Array<{
+          name: string;
+          type: string;
+          fakerType?: string | null;
+        }>;
+        jsonTemplate?: string;
+      } = {
         name: trimmedName,
-        ...(fieldsPayload && { fields: fieldsPayload }),
-      });
+        mode,
+      };
+
+      if (mode === "schema") {
+        // Build fields array for API (exclude "id" field - backend doesn't need it)
+        const userFields = fields.filter((field) => field.name !== "id");
+        const fieldsPayload =
+          userFields.length > 0
+            ? userFields.map((field) => ({
+                name: field.name.trim(),
+                type: field.type,
+                fakerType:
+                  field.type === "faker" ? field.fakerType || null : null,
+              }))
+            : undefined;
+
+        if (fieldsPayload && fieldsPayload.length > 0) {
+          payload.fields = fieldsPayload;
+        }
+      } else {
+        payload.jsonTemplate = jsonTemplate;
+      }
+
+      // Call API to create resource
+      const createdResource = await resourcesService.create(projectId, payload);
 
       addToast({
         title: "Resource created successfully",
@@ -303,7 +402,44 @@ export function CreateResourceModal({
 
   const handleClose = () => {
     setResourceName("");
-    setFields([]);
+    setMode("schema");
+    setFields([
+      {
+        id: "system-id-field",
+        name: "id",
+        type: "uuid",
+        defaultValue: "{{uuid}}",
+        required: true,
+      },
+    ]);
+    setJsonTemplate(`{
+  "id": "{{uuid}}",
+  "name": "{{person.fullName}}",
+  "email": "{{internet.email}}",
+  "age": "{{number}}",
+  "isActive": "{{boolean}}",
+  "posts": [
+    {
+      "id": "{{uuid}}",
+      "title": "{{lorem.sentence}}",
+      "content": "{{lorem.paragraph}}",
+      "createdAt": "{{date.recent}}"
+    }
+  ],
+  "comments": [
+    {
+      "id": "{{uuid}}",
+      "content": "{{lorem.paragraph}}",
+      "createdAt": "{{date.recent}}"
+    }
+  ],
+  "tags": [
+    "{{lorem.word}}",
+    "{{lorem.word}}",
+    "{{lorem.word}}"
+  ],
+  "createdAt": "{{date.recent}}"
+}`);
     setError("");
     onClose();
   };
@@ -319,9 +455,6 @@ export function CreateResourceModal({
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
           <h2 className="text-2xl font-semibold">Create New Resource</h2>
-          <p className="text-sm text-default-600 font-normal">
-            Define your resource schema and properties
-          </p>
         </ModalHeader>
         <ModalBody className="">
           {error && (
@@ -330,204 +463,312 @@ export function CreateResourceModal({
             </div>
           )}
 
-                {/* Resource Name */}
-                <div className="mb-6">
-                  <Input
-                    description="Lowercase letters, numbers, hyphens (-) or underscores (_). Must start and end with alphanumeric. Max 50 characters. Examples: users, user-posts, order_items"
-                    label="Resource Name"
-                    placeholder="e.g., users, products, posts"
-                    size="lg"
-                    value={resourceName}
-                    variant="bordered"
-                    onChange={(e) => {
-                      // Convert to lowercase automatically
-                      const value = e.target.value.toLowerCase();
+          {/* Resource Name */}
+          <div className="">
+            <Input
+              description="Examples: users, user-posts, order_items"
+              label="Resource Name"
+              placeholder="e.g., users, products, posts"
+              size="lg"
+              value={resourceName}
+              variant="bordered"
+              onChange={(e) => {
+                // Convert to lowercase automatically
+                const value = e.target.value.toLowerCase();
 
-                      setResourceName(value);
+                setResourceName(value);
+                setError("");
+              }}
+            />
+          </div>
+
+          {/* Mode Selection Tabs */}
+          <Tabs
+            aria-label="Data mode selection"
+            selectedKey={mode}
+            onSelectionChange={(key) => {
+              setMode(key as "schema" | "template");
+              setError("");
+            }}
+          >
+            <Tab
+              key="schema"
+              title={
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4" />
+                  <span>Schema Mode</span>
+                </div>
+              }
+            >
+              {/* Schema Fields */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">Schema Fields</h3>
+                    <p className="text-sm text-default-600">
+                      Define the properties for your resource
+                    </p>
+                  </div>
+                  <Button
+                    color="primary"
+                    size="sm"
+                    startContent={<Plus size={16} />}
+                    variant="flat"
+                    onPress={handleAddField}
+                  >
+                    Add Field
+                  </Button>
+                </div>
+
+                {fields.length === 0 ||
+                (fields.length === 1 && fields[0]?.name === "id") ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-default-300 rounded-lg">
+                    <div className="rounded-full bg-default-100 p-4 mb-3">
+                      <Plus className="h-6 w-6 text-default-400" />
+                    </div>
+                    <p className="text-sm text-default-600 mb-2">
+                      No fields added yet
+                    </p>
+                    <p className="text-xs text-default-500 mb-4">
+                      Click &quot;Add Field&quot; to start building your schema
+                    </p>
+                    <Button
+                      color="primary"
+                      size="sm"
+                      startContent={<Plus size={16} />}
+                      variant="flat"
+                      onPress={handleAddField}
+                    >
+                      Add Your First Field
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {fields.map((field) => {
+                      const isIdField = field.name === "id";
+
+                      return (
+                        <div
+                          key={field.id}
+                          className="p-4 px-0 py-2 pb-4 border-b border-default-200 rounded-lg"
+                        >
+                          <div className="flex-1 items-center gap-1 flex max-md:flex-col w-full">
+                            <div className="max-md:w-full flex-auto grid grid-cols-3 max-md:grid-cols-1 gap-4">
+                              {/* Field Name */}
+                              <Input
+                                isDisabled={isIdField}
+                                label="Field Name"
+                                placeholder="e.g., name, email, price"
+                                size="md"
+                                value={field.name}
+                                variant="bordered"
+                                onChange={(e) => {
+                                  if (!isIdField) {
+                                    handleFieldChange(
+                                      field.id,
+                                      "name",
+                                      e.target.value,
+                                    );
+                                  }
+                                }}
+                              />
+
+                              {/* Field Type */}
+                              <Select
+                                isDisabled={isIdField}
+                                label="Field Type"
+                                placeholder="Select field type"
+                                selectedKeys={[field.type]}
+                                size="md"
+                                variant="bordered"
+                                onSelectionChange={(keys) => {
+                                  if (!isIdField) {
+                                    const selectedKey = Array.from(
+                                      keys,
+                                    )[0] as string;
+
+                                    if (selectedKey) {
+                                      handleFieldChange(
+                                        field.id,
+                                        "type",
+                                        selectedKey,
+                                      );
+                                    }
+                                  }
+                                }}
+                              >
+                                {FIELD_TYPES.map((type) => (
+                                  <SelectItem key={type.value}>
+                                    {type.label}
+                                  </SelectItem>
+                                ))}
+                              </Select>
+
+                              {/* Default Value or Faker Type */}
+                              {field.type === "faker" ? (
+                                <Select
+                                  isDisabled={isIdField}
+                                  label="Faker Type"
+                                  placeholder="Select faker type"
+                                  selectedKeys={
+                                    field.fakerType ? [field.fakerType] : []
+                                  }
+                                  size="md"
+                                  variant="bordered"
+                                  onSelectionChange={(keys) => {
+                                    if (!isIdField) {
+                                      const selectedKey = Array.from(
+                                        keys,
+                                      )[0] as string;
+
+                                      if (selectedKey) {
+                                        handleFieldChange(
+                                          field.id,
+                                          "fakerType",
+                                          selectedKey,
+                                        );
+                                      }
+                                    }
+                                  }}
+                                >
+                                  {Array.from(
+                                    new Set(FAKER_TYPES.map((f) => f.category)),
+                                  ).map((category) => {
+                                    const categoryItems = FAKER_TYPES.filter(
+                                      (item) => item.category === category,
+                                    );
+
+                                    return (
+                                      <SelectSection
+                                        key={category}
+                                        title={category}
+                                      >
+                                        {categoryItems.map((item) => (
+                                          <SelectItem key={item.value}>
+                                            {item.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectSection>
+                                    );
+                                  })}
+                                </Select>
+                              ) : (
+                                <Input
+                                  description="Default value for this field"
+                                  isDisabled={isIdField}
+                                  label="Default Value (Optional)"
+                                  placeholder="e.g., John Doe, 0, true"
+                                  size="md"
+                                  value={field.defaultValue}
+                                  variant="bordered"
+                                  onChange={(e) => {
+                                    if (!isIdField) {
+                                      handleFieldChange(
+                                        field.id,
+                                        "defaultValue",
+                                        e.target.value,
+                                      );
+                                    }
+                                  }}
+                                />
+                              )}
+                            </div>
+                            {!isIdField && (
+                              <Button
+                                isIconOnly
+                                color="danger"
+                                size="sm"
+                                variant="light"
+                                onPress={() => handleRemoveField(field.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <Button
+                      color="primary"
+                      size="sm"
+                      startContent={<Plus size={16} />}
+                      variant="flat"
+                      onPress={handleAddField}
+                    >
+                      Add Field
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </Tab>
+            <Tab
+              key="template"
+              title={
+                <div className="flex items-center gap-2">
+                  <Code className="h-4 w-4" />
+                  <span>Template Mode</span>
+                </div>
+              }
+            >
+              <div className="">
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold mb-1">JSON Template</h3>
+                  <p className="text-sm text-default-600">
+                    Define a JSON template for complex nested structures. This
+                    will be used to generate records.
+                  </p>
+                </div>
+                <div className="border border-default-200 rounded-lg overflow-hidden">
+                  <Editor
+                    defaultLanguage="json"
+                    height="400px"
+                    options={{
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      fontSize: 14,
+                      wordWrap: "on",
+                      tabSize: 2,
+                      placeholder: "Enter JSON template here...",
+                      suggestOnTriggerCharacters: true,
+                      quickSuggestions: {
+                        other: true,
+                        comments: false,
+                        strings: true,
+                      },
+                    }}
+                    value={jsonTemplate}
+                    onChange={(value) => {
+                      setJsonTemplate(value || "");
                       setError("");
                     }}
                   />
                 </div>
-
-          {/* Schema Fields */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold">Schema Fields</h3>
-                <p className="text-sm text-default-600">
-                  Define the properties for your resource
-                </p>
-              </div>
-              <Button
-                color="primary"
-                size="sm"
-                startContent={<Plus size={16} />}
-                variant="flat"
-                onPress={handleAddField}
-              >
-                Add Field
-              </Button>
-            </div>
-
-            {fields.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-default-300 rounded-lg">
-                <div className="rounded-full bg-default-100 p-4 mb-3">
-                  <Plus className="h-6 w-6 text-default-400" />
+                <div className="mt-3 p-3 bg-default-50 border border-default-200 rounded-lg">
+                  <p className="text-xs font-semibold text-default-700 mb-2">
+                    💡 Example Template:
+                  </p>
+                  <pre className="text-xs text-default-600 overflow-x-auto">
+                    {`{
+  "id": "{{uuid}}",
+  "name": "{{person.fullName}}",
+  "email": "{{internet.email}}",
+  "address": {
+    "street": "{{location.streetAddress}}",
+    "city": "{{location.city}}",
+    "country": "{{location.country}}"
+  },
+  "tags": ["{{lorem.word}}", "{{lorem.word}}"],
+  "score": {{number.float({"min": 0, "max": 100, "precision": 0.01})}}
+}`}
+                  </pre>
+                  <p className="text-xs text-default-500 mt-2">
+                    Use <code className="text-xs">{`{{`}</code> for Faker.js
+                    expressions. The template must be valid JSON.
+                  </p>
                 </div>
-                <p className="text-sm text-default-600 mb-2">
-                  No fields added yet
-                </p>
-                <p className="text-xs text-default-500 mb-4">
-                  Click &quot;Add Field&quot; to start building your schema
-                </p>
-                <Button
-                  color="primary"
-                  size="sm"
-                  startContent={<Plus size={16} />}
-                  variant="flat"
-                  onPress={handleAddField}
-                >
-                  Add Your First Field
-                </Button>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {fields.map((field) => (
-                  <div
-                    key={field.id}
-                    className="p-4 py-2 border-b border-default-200 rounded-lg"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      {/* Required */}
-                      <Checkbox
-                        isSelected={field.required}
-                        size="md"
-                        onValueChange={(checked) => {
-                          handleFieldChange(field.id, "required", checked);
-                        }}
-                      >
-                        <span className="text-sm font-medium text-default-700 cursor-pointer">
-                          Required Field
-                        </span>
-                      </Checkbox>
-                      <Button
-                        isIconOnly
-                        color="danger"
-                        size="sm"
-                        variant="light"
-                        onPress={() => handleRemoveField(field.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    <div className="grid grid-cols-3 max-md:grid-cols-1 gap-4">
-                      {/* Field Name */}
-                      <Input
-                        description="Property name (camelCase recommended)"
-                        label="Field Name"
-                        placeholder="e.g., name, email, price"
-                        size="md"
-                        value={field.name}
-                        variant="bordered"
-                        onChange={(e) => {
-                          handleFieldChange(field.id, "name", e.target.value);
-                        }}
-                      />
-
-                      {/* Field Type */}
-                      <Select
-                        label="Field Type"
-                        placeholder="Select field type"
-                        selectedKeys={[field.type]}
-                        size="md"
-                        variant="bordered"
-                        onSelectionChange={(keys) => {
-                          const selectedKey = Array.from(keys)[0] as string;
-
-                          if (selectedKey) {
-                            handleFieldChange(field.id, "type", selectedKey);
-                          }
-                        }}
-                      >
-                        {FIELD_TYPES.map((type) => (
-                          <SelectItem key={type.value}>{type.label}</SelectItem>
-                        ))}
-                      </Select>
-
-                      {/* Default Value or Faker Type */}
-                      {field.type === "faker" ? (
-                        <Select
-                          description="Select the type of fake data to generate"
-                          label="Faker Type"
-                          placeholder="Select faker type"
-                          selectedKeys={
-                            field.fakerType ? [field.fakerType] : []
-                          }
-                          size="md"
-                          variant="bordered"
-                          onSelectionChange={(keys) => {
-                            const selectedKey = Array.from(keys)[0] as string;
-
-                            if (selectedKey) {
-                              handleFieldChange(
-                                field.id,
-                                "fakerType",
-                                selectedKey,
-                              );
-                            }
-                          }}
-                        >
-                          {Array.from(
-                            new Set(FAKER_TYPES.map((f) => f.category)),
-                          ).map((category) => {
-                            const categoryItems = FAKER_TYPES.filter(
-                              (item) => item.category === category,
-                            );
-
-                            return (
-                              <SelectSection key={category} title={category}>
-                                {categoryItems.map((item) => (
-                                  <SelectItem key={item.value}>
-                                    {item.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectSection>
-                            );
-                          })}
-                        </Select>
-                      ) : (
-                        <Input
-                          description="Default value for this field"
-                          label="Default Value (Optional)"
-                          placeholder="e.g., John Doe, 0, true"
-                          size="md"
-                          value={field.defaultValue}
-                          variant="bordered"
-                          onChange={(e) => {
-                            handleFieldChange(
-                              field.id,
-                              "defaultValue",
-                              e.target.value,
-                            );
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                ))}
-                <Button
-                  color="primary"
-                  size="sm"
-                  startContent={<Plus size={16} />}
-                  variant="flat"
-                  onPress={handleAddField}
-                >
-                  Add Field
-                </Button>
-              </div>
-            )}
-          </div>
+            </Tab>
+          </Tabs>
         </ModalBody>
         <ModalFooter className="sticky bottom-0 bg-background z-10 rounded-b-2xl">
           <Button color="danger" variant="light" onPress={handleClose}>

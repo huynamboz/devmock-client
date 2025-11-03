@@ -6,7 +6,7 @@ import {
   Loader2,
   Table as TableIcon,
 } from "lucide-react";
-import ReactJson from "react-json-view";
+import { JsonEditor } from "json-edit-react";
 import { Button } from "@heroui/button";
 import {
   Modal,
@@ -159,19 +159,11 @@ export function ViewDataModal({
               >
                 <div className="relative flex-1 mt-4">
                   <div className="overflow-auto rounded-lg border border-default-200 bg-default-50 p-4">
-                    <ReactJson
-                      collapsed={false}
-                      displayDataTypes={false}
-                      displayObjectSize={false}
-                      enableClipboard={false}
-                      indentWidth={2}
-                      name={false}
-                      src={records}
-                      style={{
-                        backgroundColor: "transparent",
-                        fontSize: "14px",
-                      }}
-                      theme="rjv-default"
+                    <JsonEditor
+                      className="w-full !max-w-full"
+                      data={records}
+                      rootName=""
+                      showCollectionCount="when-closed"
                     />
                   </div>
                   <Button

@@ -32,20 +32,21 @@ export interface CreateProjectRequest {
 
 export interface CreateResourceRequest {
   name: string;
+  mode?: "schema" | "template";
   fields?: Array<{
     name: string;
     type: string;
     fakerType?: string | null;
   }>;
+  jsonTemplate?: string;
 }
 
 export interface UpdateResourceRequest {
   name?: string;
   fields?: Array<{
-    id?: string;
     name: string;
     type: string;
     fakerType?: string | null;
   }>;
+  jsonTemplate?: string;
 }
-
