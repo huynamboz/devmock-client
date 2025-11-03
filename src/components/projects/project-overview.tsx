@@ -49,7 +49,7 @@ export function ProjectOverview({ project, onDelete }: ProjectOverviewProps) {
   };
 
   return (
-    <div className="bg-content1 border border-default-200 rounded-xl p-6 md:p-8">
+    <div className="bg-content1 border border-default-200 rounded-3xl p-6 md:p-8">
       {/* Header Section */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-4 flex-1">
@@ -57,7 +57,7 @@ export function ProjectOverview({ project, onDelete }: ProjectOverviewProps) {
             <Code2 className="h-7 w-7 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className={title({ size: "lg" })}>{project.name}</h1>
+            <h1 className={title({ size: "sm" })}>{project.name}</h1>
             <p className="text-default-600 mt-1 text-sm">
               ID: <code className="text-xs font-mono">{project.id}</code>
             </p>

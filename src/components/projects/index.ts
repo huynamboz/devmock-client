@@ -3,7 +3,9 @@ export { CreateResourceModal } from "./create-resource-modal";
 export { DeleteProjectModal } from "./delete-project-modal";
 export { DeleteResourceModal } from "./delete-resource-modal";
 export { EditResourceModal } from "./edit-resource-modal";
+export { GenerateRecordsModal } from "./generate-records-modal";
 export { ProjectError } from "./project-error";
 export { ProjectOverview } from "./project-overview";
+export { ResourceItem } from "./resource-item";
 export { ResourcesSection } from "./resources-section";
 

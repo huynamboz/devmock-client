@@ -1,8 +1,10 @@
 import type { Project } from "@/types/project";
 
 import { useState } from "react";
-import { Check, Copy, Database, Edit, Eye, Plus, Trash2 } from "lucide-react";
+import { Database, Plus } from "lucide-react";
 import { Button } from "@heroui/button";
+
+import { ResourceItem } from "./resource-item";
 
 import { title } from "@/components/primitives";
 
@@ -12,6 +14,7 @@ interface ResourcesSectionProps {
   onDelete?: (resourceId: string, resourceName: string) => void;
   onEdit?: (resourceId: string) => void;
   onViewData?: (resourceName: string) => void;
+  onGenerateSuccess?: () => void;
 }
 
 export function ResourcesSection({
@@ -20,8 +23,10 @@ export function ResourcesSection({
   onDelete,
   onEdit,
   onViewData,
+  onGenerateSuccess,
 }: ResourcesSectionProps) {
   const [copiedResourceId, setCopiedResourceId] = useState<string | null>(null);
+  const [sliderValues, setSliderValues] = useState<Record<string, number>>({});
 
   const handleCopyApiUrl = async (resourceName: string) => {
     if (!resourceName) {
@@ -41,6 +46,13 @@ export function ResourcesSection({
       // eslint-disable-next-line no-console
       console.error("Failed to copy:", err);
     }
+  };
+
+  const handleSliderValueChange = (resourceName: string, value: number) => {
+    setSliderValues((prev) => ({
+      ...prev,
+      [resourceName]: value,
+    }));
   };
 
   return (
@@ -84,89 +96,21 @@ export function ResourcesSection({
         </div>
       ) : (
         <div className="space-y-3">
-          {project.resources.map((resource) => {
-            const resourceName = resource.name || "Unnamed Resource";
-            const isCopied = copiedResourceId === resourceName;
-            const apiUrl = `https://${project.id}.mockpilot.io/${resourceName}`;
-
-            return (
-              <div
-                key={resource.id}
-                className="bg-default-50 border border-default-200 rounded-lg p-4 hover:border-primary hover:shadow-sm transition-all duration-200"
-              >
-                <div className="flex items-center gap-3">
-                  {/* Icon & Name */}
-                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <div className="rounded-lg bg-primary/10 p-2 flex-shrink-0">
-                      <Database className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm line-clamp-1 mb-0.5">
-                        {resourceName}
-                      </h3>
-                      <div className="flex items-center gap-2 text-xs text-default-500">
-                        <p className="font-mono truncate max-md:max-w-[200px]">
-                          {apiUrl}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button
-                      color="primary"
-                      size="sm"
-                      startContent={
-                        isCopied ? (
-                          <Check className="h-3.5 w-3.5" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )
-                      }
-                      variant="light"
-                      onPress={() => handleCopyApiUrl(resourceName)}
-                    >
-                      {isCopied ? "Copied" : "Copy"}
-                    </Button>
-                    {onViewData && (
-                      <Button
-                        color="default"
-                        size="sm"
-                        startContent={<Eye className="h-3.5 w-3.5" />}
-                        variant="light"
-                        onPress={() => onViewData(resourceName)}
-                      >
-                        View Data
-                      </Button>
-                    )}
-                    {onEdit && (
-                      <Button
-                        color="default"
-                        size="sm"
-                        startContent={<Edit className="h-3.5 w-3.5" />}
-                        variant="light"
-                        onPress={() => onEdit(resource.id)}
-                      >
-                        Edit
-                      </Button>
-                    )}
-                    {onDelete && (
-                      <Button
-                        color="danger"
-                        size="sm"
-                        startContent={<Trash2 className="h-3.5 w-3.5" />}
-                        variant="light"
-                        onPress={() => onDelete(resource.id, resourceName)}
-                      >
-                        Delete
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {project.resources.map((resource) => (
+            <ResourceItem
+              key={resource.id}
+              isCopied={copiedResourceId === resource.name}
+              projectId={project.id}
+              resource={resource}
+              sliderValue={sliderValues[resource.name]}
+              onCopy={handleCopyApiUrl}
+              onDelete={onDelete}
+              onEdit={onEdit}
+              onGenerateSuccess={onGenerateSuccess}
+              onSliderValueChange={handleSliderValueChange}
+              onViewData={onViewData}
+            />
+          ))}
         </div>
       )}
     </div>

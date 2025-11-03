@@ -16,6 +16,7 @@ import { Select, SelectItem, SelectSection } from "@heroui/select";
 import { addToast } from "@heroui/toast";
 
 import { resourcesService } from "@/services/resources.service";
+import { validateResourceName } from "@/utils/resource-name-validation";
 
 interface ResourceField {
   id: string;
@@ -199,12 +200,16 @@ export function CreateResourceModal({
   };
 
   const handleCreate = async () => {
-    // Validate resource name
-    if (!resourceName.trim()) {
-      setError("Resource name is required");
+    // Validate resource name format
+    const nameValidation = validateResourceName(resourceName);
+
+    if (!nameValidation.isValid) {
+      setError(nameValidation.error || "Resource name is invalid");
 
       return;
     }
+
+    const trimmedName = resourceName.trim();
 
     // Validate field names (if fields are added)
     if (fields.length > 0) {
@@ -255,9 +260,24 @@ export function CreateResourceModal({
             }))
           : undefined;
 
+      // Check name availability before creating
+      const nameCheck = await resourcesService.checkNameAvailability(
+        projectId,
+        trimmedName,
+      );
+
+      if (!nameCheck.available) {
+        setError(
+          nameCheck.message ||
+            `Resource name "${trimmedName}" already exists in this project`,
+        );
+
+        return;
+      }
+
       // Call API to create resource with fields
       const createdResource = await resourcesService.create(projectId, {
-        name: resourceName.trim(),
+        name: trimmedName,
         ...(fieldsPayload && { fields: fieldsPayload }),
       });
 
@@ -310,21 +330,24 @@ export function CreateResourceModal({
             </div>
           )}
 
-          {/* Resource Name */}
-          <div className="mb-6">
-            <Input
-              description="This will be used as the endpoint name (e.g., /users, /products)"
-              label="Resource Name"
-              placeholder="e.g., users, products, posts"
-              size="lg"
-              value={resourceName}
-              variant="bordered"
-              onChange={(e) => {
-                setResourceName(e.target.value);
-                setError("");
-              }}
-            />
-          </div>
+                {/* Resource Name */}
+                <div className="mb-6">
+                  <Input
+                    description="Lowercase letters, numbers, hyphens (-) or underscores (_). Must start and end with alphanumeric. Max 50 characters. Examples: users, user-posts, order_items"
+                    label="Resource Name"
+                    placeholder="e.g., users, products, posts"
+                    size="lg"
+                    value={resourceName}
+                    variant="bordered"
+                    onChange={(e) => {
+                      // Convert to lowercase automatically
+                      const value = e.target.value.toLowerCase();
+
+                      setResourceName(value);
+                      setError("");
+                    }}
+                  />
+                </div>
 
           {/* Schema Fields */}
           <div className="mb-4">

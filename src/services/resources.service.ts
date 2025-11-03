@@ -61,6 +61,23 @@ class ResourcesService {
   async delete(resourceId: string): Promise<void> {
     await apiClient.delete(`/resources/${resourceId}`);
   }
+
+  /**
+   * Check if resource name is available in a project
+   */
+  async checkNameAvailability(
+    projectId: string,
+    name: string,
+  ): Promise<{ available: boolean; message?: string }> {
+    const response = await apiClient.get<{ available: boolean; message?: string }>(
+      `${this.baseURL}/${projectId}/resources/check-name`,
+      {
+        params: { name },
+      },
+    );
+
+    return response.data;
+  }
 }
 
 export const resourcesService = new ResourcesService();

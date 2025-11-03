@@ -216,6 +216,10 @@ export default function ProjectDetailPage() {
             onViewData={(resourceName) => {
               // TODO: Implement view data functionality
             }}
+            onGenerateSuccess={() => {
+              // Optional: Refresh project if needed after generating records
+              // loadProject();
+            }}
           />
 
           {/* Create Resource Modal */}

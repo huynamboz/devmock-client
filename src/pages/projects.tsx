@@ -155,7 +155,7 @@ export default function ProjectsPage() {
               {projects.map((project) => (
                 <div
                   key={project.id}
-                  className="group relative bg-content1 border border-default-200 rounded-xl p-6 hover:border-primary hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  className="group relative bg-content1 border border-default-200 rounded-3xl p-6 hover:border-primary hover:shadow-lg transition-all duration-200 cursor-pointer"
                   role="button"
                   tabIndex={0}
                   onClick={() => navigate(`/projects/${project.id}`)}

@@ -16,6 +16,7 @@ import { Select, SelectItem, SelectSection } from "@heroui/select";
 import { addToast } from "@heroui/toast";
 
 import { resourcesService } from "@/services/resources.service";
+import { validateResourceName } from "@/utils/resource-name-validation";
 
 interface ResourceFieldForm {
   id: string;
@@ -246,11 +247,47 @@ export function EditResourceModal({
       return;
     }
 
-    // Validate resource name
-    if (!resourceName.trim()) {
-      setError("Resource name is required");
+    // Validate resource name format
+    const nameValidation = validateResourceName(resourceName);
+
+    if (!nameValidation.isValid) {
+      setError(nameValidation.error || "Resource name is invalid");
 
       return;
+    }
+
+    const trimmedName = resourceName.trim();
+
+    // Check if name changed and check availability
+    const originalName = resource?.name || "";
+
+    if (trimmedName !== originalName) {
+      // Name changed, need to check availability
+      if (!resource?.projectId) {
+        setError("Cannot check name availability: project ID is missing");
+
+        return;
+      }
+
+      try {
+        const nameCheck = await resourcesService.checkNameAvailability(
+          resource.projectId,
+          trimmedName,
+        );
+
+        if (!nameCheck.available) {
+          setError(
+            nameCheck.message ||
+              `Resource name "${trimmedName}" already exists in this project`,
+          );
+
+          return;
+        }
+      } catch (err) {
+        // If check fails, still try to update (might be a network error)
+        // eslint-disable-next-line no-console
+        console.warn("Failed to check name availability:", err);
+      }
     }
 
     // Validate field names (if fields are added)
@@ -301,7 +338,7 @@ export function EditResourceModal({
 
       // Call API to update resource
       const updatedResource = await resourcesService.update(resourceId, {
-        name: resourceName.trim(),
+        name: trimmedName,
         fields: fieldsPayload,
       });
 
@@ -376,20 +413,23 @@ export function EditResourceModal({
                 </div>
               </div>
 
-              {/* Resource Name */}
-              <div className="mb-6">
-                <Input
-                  description="Resource name"
-                  label="Resource Name"
-                  size="lg"
-                  value={resourceName}
-                  variant="bordered"
-                  onChange={(e) => {
-                    setResourceName(e.target.value);
-                    setError("");
-                  }}
-                />
-              </div>
+                    {/* Resource Name */}
+                    <div className="mb-6">
+                      <Input
+                        description="Lowercase letters, numbers, hyphens (-) or underscores (_). Must start and end with alphanumeric. Max 50 characters. Examples: users, user-posts, order_items"
+                        label="Resource Name"
+                        size="lg"
+                        value={resourceName}
+                        variant="bordered"
+                        onChange={(e) => {
+                          // Convert to lowercase automatically
+                          const value = e.target.value.toLowerCase();
+
+                          setResourceName(value);
+                          setError("");
+                        }}
+                      />
+                    </div>
 
               {/* Schema Fields */}
               <div className="mb-4">
