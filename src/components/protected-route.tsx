@@ -1,14 +1,18 @@
 import { useEffect } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuthStore } from "@/stores/auth.store";
 
 export function ProtectedRoute() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isLoading, isAuthenticated, checkAuth, user } = useAuthStore();
   const hasToken = !!user || !!localStorage.getItem("access_token");
 
   useEffect(() => {
+    if (!hasToken) {
+      navigate("/login");
+    }
     if (hasToken && !isAuthenticated) {
       checkAuth();
     }

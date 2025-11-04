@@ -11,9 +11,9 @@ export default {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        'hero-pattern': 'url("/assets/images/hero-pattern.svg")',
-      },
+      // backgroundImage: {
+      //   'hero-pattern': 'url("/assets/images/hero-pattern.svg")',
+      // },
     },
   },
   darkMode: "class",

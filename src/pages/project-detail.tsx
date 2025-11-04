@@ -19,6 +19,7 @@ import {
 import { projectsService } from "@/services/projects.service";
 import { resourcesService } from "@/services/resources.service";
 import DefaultLayout from "@/layouts/default";
+import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -176,7 +177,8 @@ export default function ProjectDetailPage() {
   return (
     <DefaultLayout>
       <div className="background-grid flex-grow">
-        <div className="container mx-auto max-w-7xl px-6 py-8">
+        <BackgroundRippleEffect cellSize={50}/>
+        <div className="container relative z-10 mx-auto max-w-7xl px-6 py-8">
           {/* Back Button */}
           <Button
             className="mb-6"

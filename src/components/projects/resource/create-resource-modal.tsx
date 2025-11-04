@@ -1,8 +1,9 @@
 import type { Resource } from "@/types/project";
 
 import { useState } from "react";
-import Editor from "@monaco-editor/react";
-import { Code, Plus, Trash2, Database } from "lucide-react";
+// import Editor from "@monaco-editor/react";
+import { Plus, Trash2 } from "lucide-react";
+// import { Code } from "lucide-react"; // For Template Mode
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import {
@@ -13,7 +14,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Select, SelectItem, SelectSection } from "@heroui/select";
-import { Tabs, Tab } from "@heroui/tabs";
+// import { Tabs, Tab } from "@heroui/tabs"; // Temporarily disabled - Template Mode removed
 import { addToast } from "@heroui/toast";
 
 import { resourcesService } from "@/services/resources.service";
@@ -474,293 +475,206 @@ export function CreateResourceModal({
             />
           </div>
 
-          {/* Mode Selection Tabs */}
-          <Tabs
-            aria-label="Data mode selection"
-            selectedKey={mode}
-            onSelectionChange={(key) => {
-              setMode(key as "schema" | "template");
-              setError("");
-            }}
-          >
-            <Tab
-              key="schema"
-              title={
-                <div className="flex items-center gap-2">
-                  <Database className="h-4 w-4" />
-                  <span>Schema Mode</span>
-                </div>
-              }
-            >
-              {/* Schema Fields */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">Schema Fields</h3>
-                    <p className="text-sm text-default-600">
-                      Define the properties for your resource
-                    </p>
-                  </div>
-                  <Button
-                    color="primary"
-                    size="sm"
-                    startContent={<Plus size={16} />}
-                    variant="flat"
-                    onPress={handleAddField}
-                  >
-                    Add Field
-                  </Button>
-                </div>
+          {/* Schema Fields */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold">Schema Fields</h3>
+                <p className="text-sm text-default-600">
+                  Define the properties for your resource
+                </p>
+              </div>
+              <Button
+                color="primary"
+                size="sm"
+                startContent={<Plus size={16} />}
+                variant="flat"
+                onPress={handleAddField}
+              >
+                Add Field
+              </Button>
+            </div>
 
-                {fields.length === 0 ||
-                (fields.length === 1 && fields[0]?.name === "id") ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-default-300 rounded-lg">
-                    <div className="rounded-full bg-default-100 p-4 mb-3">
-                      <Plus className="h-6 w-6 text-default-400" />
-                    </div>
-                    <p className="text-sm text-default-600 mb-2">
-                      No fields added yet
-                    </p>
-                    <p className="text-xs text-default-500 mb-4">
-                      Click &quot;Add Field&quot; to start building your schema
-                    </p>
-                    <Button
-                      color="primary"
-                      size="sm"
-                      startContent={<Plus size={16} />}
-                      variant="flat"
-                      onPress={handleAddField}
+            {fields.length === 0 ||
+            (fields.length === 1 && fields[0]?.name === "id") ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-default-300 rounded-lg">
+                <div className="rounded-full bg-default-100 p-4 mb-3">
+                  <Plus className="h-6 w-6 text-default-400" />
+                </div>
+                <p className="text-sm text-default-600 mb-2">
+                  No fields added yet
+                </p>
+                <p className="text-xs text-default-500 mb-4">
+                  Click &quot;Add Field&quot; to start building your schema
+                </p>
+                <Button
+                  color="primary"
+                  size="sm"
+                  startContent={<Plus size={16} />}
+                  variant="flat"
+                  onPress={handleAddField}
+                >
+                  Add Your First Field
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {fields.map((field) => {
+                  const isIdField = field.name === "id";
+
+                  return (
+                    <div
+                      key={field.id}
+                      className="p-4 px-0 py-2 pb-4 border-b border-default-200 rounded-lg"
                     >
-                      Add Your First Field
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {fields.map((field) => {
-                      const isIdField = field.name === "id";
+                      <div className="flex-1 items-center gap-1 flex max-md:flex-col w-full">
+                        <div className="max-md:w-full flex-auto grid grid-cols-3 max-md:grid-cols-1 gap-4">
+                          {/* Field Name */}
+                          <Input
+                            isDisabled={isIdField}
+                            label="Field Name"
+                            placeholder="e.g., name, email, price"
+                            size="md"
+                            value={field.name}
+                            variant="bordered"
+                            onChange={(e) => {
+                              if (!isIdField) {
+                                handleFieldChange(
+                                  field.id,
+                                  "name",
+                                  e.target.value,
+                                );
+                              }
+                            }}
+                          />
 
-                      return (
-                        <div
-                          key={field.id}
-                          className="p-4 px-0 py-2 pb-4 border-b border-default-200 rounded-lg"
-                        >
-                          <div className="flex-1 items-center gap-1 flex max-md:flex-col w-full">
-                            <div className="max-md:w-full flex-auto grid grid-cols-3 max-md:grid-cols-1 gap-4">
-                              {/* Field Name */}
-                              <Input
-                                isDisabled={isIdField}
-                                label="Field Name"
-                                placeholder="e.g., name, email, price"
-                                size="md"
-                                value={field.name}
-                                variant="bordered"
-                                onChange={(e) => {
-                                  if (!isIdField) {
+                          {/* Field Type */}
+                          <Select
+                            isDisabled={isIdField}
+                            label="Field Type"
+                            placeholder="Select field type"
+                            selectedKeys={[field.type]}
+                            size="md"
+                            variant="bordered"
+                            onSelectionChange={(keys) => {
+                              if (!isIdField) {
+                                const selectedKey = Array.from(
+                                  keys,
+                                )[0] as string;
+
+                                if (selectedKey) {
+                                  handleFieldChange(
+                                    field.id,
+                                    "type",
+                                    selectedKey,
+                                  );
+                                }
+                              }
+                            }}
+                          >
+                            {FIELD_TYPES.map((type) => (
+                              <SelectItem key={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </Select>
+
+                          {/* Default Value or Faker Type */}
+                          {field.type === "faker" ? (
+                            <Select
+                              isDisabled={isIdField}
+                              label="Faker Type"
+                              placeholder="Select faker type"
+                              selectedKeys={
+                                field.fakerType ? [field.fakerType] : []
+                              }
+                              size="md"
+                              variant="bordered"
+                              onSelectionChange={(keys) => {
+                                if (!isIdField) {
+                                  const selectedKey = Array.from(
+                                    keys,
+                                  )[0] as string;
+
+                                  if (selectedKey) {
                                     handleFieldChange(
                                       field.id,
-                                      "name",
-                                      e.target.value,
+                                      "fakerType",
+                                      selectedKey,
                                     );
                                   }
-                                }}
-                              />
+                                }
+                              }}
+                            >
+                              {Array.from(
+                                new Set(FAKER_TYPES.map((f) => f.category)),
+                              ).map((category) => {
+                                const categoryItems = FAKER_TYPES.filter(
+                                  (item) => item.category === category,
+                                );
 
-                              {/* Field Type */}
-                              <Select
-                                isDisabled={isIdField}
-                                label="Field Type"
-                                placeholder="Select field type"
-                                selectedKeys={[field.type]}
-                                size="md"
-                                variant="bordered"
-                                onSelectionChange={(keys) => {
-                                  if (!isIdField) {
-                                    const selectedKey = Array.from(
-                                      keys,
-                                    )[0] as string;
-
-                                    if (selectedKey) {
-                                      handleFieldChange(
-                                        field.id,
-                                        "type",
-                                        selectedKey,
-                                      );
-                                    }
-                                  }
-                                }}
-                              >
-                                {FIELD_TYPES.map((type) => (
-                                  <SelectItem key={type.value}>
-                                    {type.label}
-                                  </SelectItem>
-                                ))}
-                              </Select>
-
-                              {/* Default Value or Faker Type */}
-                              {field.type === "faker" ? (
-                                <Select
-                                  isDisabled={isIdField}
-                                  label="Faker Type"
-                                  placeholder="Select faker type"
-                                  selectedKeys={
-                                    field.fakerType ? [field.fakerType] : []
-                                  }
-                                  size="md"
-                                  variant="bordered"
-                                  onSelectionChange={(keys) => {
-                                    if (!isIdField) {
-                                      const selectedKey = Array.from(
-                                        keys,
-                                      )[0] as string;
-
-                                      if (selectedKey) {
-                                        handleFieldChange(
-                                          field.id,
-                                          "fakerType",
-                                          selectedKey,
-                                        );
-                                      }
-                                    }
-                                  }}
-                                >
-                                  {Array.from(
-                                    new Set(FAKER_TYPES.map((f) => f.category)),
-                                  ).map((category) => {
-                                    const categoryItems = FAKER_TYPES.filter(
-                                      (item) => item.category === category,
-                                    );
-
-                                    return (
-                                      <SelectSection
-                                        key={category}
-                                        title={category}
-                                      >
-                                        {categoryItems.map((item) => (
-                                          <SelectItem key={item.value}>
-                                            {item.label}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectSection>
-                                    );
-                                  })}
-                                </Select>
-                              ) : (
-                                <Input
-                                  description="Default value for this field"
-                                  isDisabled={isIdField}
-                                  label="Default Value (Optional)"
-                                  placeholder="e.g., John Doe, 0, true"
-                                  size="md"
-                                  value={field.defaultValue}
-                                  variant="bordered"
-                                  onChange={(e) => {
-                                    if (!isIdField) {
-                                      handleFieldChange(
-                                        field.id,
-                                        "defaultValue",
-                                        e.target.value,
-                                      );
-                                    }
-                                  }}
-                                />
-                              )}
-                            </div>
-                            {!isIdField && (
-                              <Button
-                                isIconOnly
-                                color="danger"
-                                size="sm"
-                                variant="light"
-                                onPress={() => handleRemoveField(field.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                                return (
+                                  <SelectSection
+                                    key={category}
+                                    title={category}
+                                  >
+                                    {categoryItems.map((item) => (
+                                      <SelectItem key={item.value}>
+                                        {item.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectSection>
+                                );
+                              })}
+                            </Select>
+                          ) : (
+                            <Input
+                              description="Default value for this field"
+                              isDisabled={isIdField}
+                              label="Default Value (Optional)"
+                              placeholder="e.g., John Doe, 0, true"
+                              size="md"
+                              value={field.defaultValue}
+                              variant="bordered"
+                              onChange={(e) => {
+                                if (!isIdField) {
+                                  handleFieldChange(
+                                    field.id,
+                                    "defaultValue",
+                                    e.target.value,
+                                  );
+                                }
+                              }}
+                            />
+                          )}
                         </div>
-                      );
-                    })}
-                    <Button
-                      color="primary"
-                      size="sm"
-                      startContent={<Plus size={16} />}
-                      variant="flat"
-                      onPress={handleAddField}
-                    >
-                      Add Field
-                    </Button>
-                  </div>
-                )}
+                        {!isIdField && (
+                          <Button
+                            isIconOnly
+                            color="danger"
+                            size="sm"
+                            variant="light"
+                            onPress={() => handleRemoveField(field.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                <Button
+                  color="primary"
+                  size="sm"
+                  startContent={<Plus size={16} />}
+                  variant="flat"
+                  onPress={handleAddField}
+                >
+                  Add Field
+                </Button>
               </div>
-            </Tab>
-            <Tab
-              key="template"
-              title={
-                <div className="flex items-center gap-2">
-                  <Code className="h-4 w-4" />
-                  <span>Template Mode</span>
-                </div>
-              }
-            >
-              <div className="">
-                <div className="mb-3">
-                  <h3 className="text-lg font-semibold mb-1">JSON Template</h3>
-                  <p className="text-sm text-default-600">
-                    Define a JSON template for complex nested structures. This
-                    will be used to generate records.
-                  </p>
-                </div>
-                <div className="border border-default-200 rounded-lg overflow-hidden">
-                  <Editor
-                    defaultLanguage="json"
-                    height="400px"
-                    options={{
-                      minimap: { enabled: false },
-                      scrollBeyondLastLine: false,
-                      fontSize: 14,
-                      wordWrap: "on",
-                      tabSize: 2,
-                      placeholder: "Enter JSON template here...",
-                      suggestOnTriggerCharacters: true,
-                      quickSuggestions: {
-                        other: true,
-                        comments: false,
-                        strings: true,
-                      },
-                    }}
-                    value={jsonTemplate}
-                    onChange={(value) => {
-                      setJsonTemplate(value || "");
-                      setError("");
-                    }}
-                  />
-                </div>
-                <div className="mt-3 p-3 bg-default-50 border border-default-200 rounded-lg">
-                  <p className="text-xs font-semibold text-default-700 mb-2">
-                    💡 Example Template:
-                  </p>
-                  <pre className="text-xs text-default-600 overflow-x-auto">
-                    {`{
-  "id": "{{uuid}}",
-  "name": "{{person.fullName}}",
-  "email": "{{internet.email}}",
-  "address": {
-    "street": "{{location.streetAddress}}",
-    "city": "{{location.city}}",
-    "country": "{{location.country}}"
-  },
-  "tags": ["{{lorem.word}}", "{{lorem.word}}"],
-  "score": {{number.float({"min": 0, "max": 100, "precision": 0.01})}}
-}`}
-                  </pre>
-                  <p className="text-xs text-default-500 mt-2">
-                    Use <code className="text-xs">{`{{`}</code> for Faker.js
-                    expressions. The template must be valid JSON.
-                  </p>
-                </div>
-              </div>
-            </Tab>
-          </Tabs>
+            )}
+          </div>
         </ModalBody>
         <ModalFooter className="sticky bottom-0 bg-background z-10 rounded-b-2xl">
           <Button color="danger" variant="light" onPress={handleClose}>

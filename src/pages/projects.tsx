@@ -19,6 +19,7 @@ import { title } from "@/components/primitives";
 import { CreateProjectModal } from "@/components/projects";
 import { projectsService } from "@/services/projects.service";
 import DefaultLayout from "@/layouts/default";
+import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -104,7 +105,8 @@ export default function ProjectsPage() {
   return (
     <DefaultLayout>
       <div className="background-grid flex-grow">
-        <div className="container mx-auto max-w-7xl px-6 py-8">
+        <BackgroundRippleEffect cellSize={50}/>
+        <div className="container relative z-10 mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>

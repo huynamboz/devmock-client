@@ -4,6 +4,7 @@ import { Button } from "@heroui/button";
 import { title } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
 import { POLAR_CONFIG } from "@/config/api";
+import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 
 interface PricingPlan {
   name: string;
@@ -47,10 +48,10 @@ const pricingPlans: PricingPlan[] = [
   },
   {
     name: "Pro Monthly",
-    price: "$4.99",
+    price: "$2.99",
     period: "per month",
     description: "For real portfolio projects and side projects",
-    monthlyPrice: 4.99,
+    monthlyPrice: 2.99,
     polarProductId: import.meta.env.VITE_POLAR_PRODUCT_MONTHLY || "",
     features: [
       "Everything in Free",
@@ -68,15 +69,15 @@ const pricingPlans: PricingPlan[] = [
   },
   {
     name: "Pro Yearly",
-    price: "$49.99",
+    price: "$11.99",
     period: "per year",
-    description: "Save 17% with annual billing",
-    monthlyPrice: 4.16,
-    originalPrice: 59.88,
+    description: "Save 75% with annual billing",
+    monthlyPrice: 2.99,
+    originalPrice: 11.99,
     polarProductId: import.meta.env.VITE_POLAR_PRODUCT_YEARLY || "",
     features: [
       "Everything in Pro Monthly",
-      "Save $9.89 per year",
+      "Save $10.89 per year",
       "All Pro features included",
       "Priority support",
       "Best value for long-term use",
@@ -109,7 +110,8 @@ export default function PricingPage() {
   return (
     <DefaultLayout>
       <div className="background-grid flex-grow">
-        <div className="container mx-auto max-w-7xl px-6 py-12 md:py-16">
+        <BackgroundRippleEffect cellSize={50}/>
+        <div className="container relative z-10 mx-auto max-w-7xl px-6 py-12 md:py-16">
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className={title({ size: "lg" })}>
@@ -135,7 +137,7 @@ export default function PricingPage() {
                     plan.isPopular
                       ? "border-2 border-primary shadow-2xl shadow-primary/20 md:scale-105"
                       : "border border-default-200 hover:border-primary/50 hover:shadow-xl"
-                  } ${plan.isCurrent ? "ring-2 ring-gray-100/30 !hover:!border-gray-100/30 hover:!shadow-none bg-gray-100" : ""}`}
+                  } ${plan.isCurrent ? "ring-2 ring-gray-100/30 !hover:!border-gray-100/30 hover:!shadow-none bg-content1" : ""}`}
                 >
                   {plan.isPopular && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
