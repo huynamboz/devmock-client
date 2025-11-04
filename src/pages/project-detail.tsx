@@ -177,7 +177,7 @@ export default function ProjectDetailPage() {
   return (
     <DefaultLayout>
       <div className="background-grid flex-grow">
-        <BackgroundRippleEffect cellSize={50}/>
+        <BackgroundRippleEffect cellSize={50} />
         <div className="container relative z-10 mx-auto max-w-7xl px-6 py-8">
           {/* Back Button */}
           <Button
@@ -215,13 +215,13 @@ export default function ProjectDetailPage() {
               setEditingResourceId(resourceId);
               onEditResourceOpen();
             }}
-            onViewData={(resourceName) => {
-              // TODO: Implement view data functionality
-            }}
             onGenerateSuccess={() => {
               // Optional: Refresh project if needed after generating records
               // loadProject();
             }}
+            // onViewData={(resourceName) => {
+            //   // TODO: Implement view data functionality
+            // }}
           />
 
           {/* Create Resource Modal */}

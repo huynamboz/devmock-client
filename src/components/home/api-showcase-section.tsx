@@ -1,12 +1,16 @@
+import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { PrismAsync } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Code2, Database, Zap, ArrowRight } from "lucide-react";
 import { Button } from "@heroui/button";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import { FIELD_TYPES } from "@/components/projects/resource/create-resource-modal";
+
+// Type assertion to fix TypeScript compatibility issue with react-syntax-highlighter
+
+const SyntaxHighlighter = PrismAsync as any;
 
 const crudMethods = [
   {
@@ -116,7 +120,9 @@ export function APIShowcaseSection() {
           >
             <div className="flex items-center gap-2 mb-4 sm:mb-6">
               <Database className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-              <h3 className="text-lg sm:text-xl font-semibold">Supported Data Types</h3>
+              <h3 className="text-lg sm:text-xl font-semibold">
+                Supported Data Types
+              </h3>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3">
               {FIELD_TYPES.map((type) => (
@@ -146,7 +152,9 @@ export function APIShowcaseSection() {
           >
             <div className="flex items-center gap-2 mb-4 sm:mb-6">
               <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-              <h3 className="text-lg sm:text-xl font-semibold">REST API Methods</h3>
+              <h3 className="text-lg sm:text-xl font-semibold">
+                REST API Methods
+              </h3>
             </div>
             <div className="space-y-2 sm:space-y-3">
               {crudMethods.map((method) => (
@@ -189,7 +197,9 @@ export function APIShowcaseSection() {
         >
           <div className="flex items-center gap-2 mb-3 sm:mb-4">
             <Code2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <h3 className="text-base sm:text-lg font-semibold">Example Usage</h3>
+            <h3 className="text-base sm:text-lg font-semibold">
+              Example Usage
+            </h3>
           </div>
           <div className="rounded-lg overflow-hidden border border-default-200 overflow-x-auto">
             <SyntaxHighlighter
@@ -263,4 +273,3 @@ await fetch(
     </section>
   );
 }
-
