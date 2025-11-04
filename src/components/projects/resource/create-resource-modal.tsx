@@ -126,14 +126,6 @@ export const FAKER_TYPES = [
     value: "commerce.department",
     category: "Commerce",
   },
-  // Number
-  { label: "Number", value: "number", category: "Number" },
-  { label: "Integer", value: "number.int", category: "Number" },
-  { label: "Float", value: "number.float", category: "Number" },
-  // Boolean
-  { label: "Boolean", value: "boolean", category: "Boolean" },
-  // UUID
-  { label: "UUID", value: "uuid", category: "UUID" },
 ];
 
 interface CreateResourceModalProps {

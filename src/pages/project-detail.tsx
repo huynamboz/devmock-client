@@ -197,7 +197,7 @@ export default function ProjectDetailPage() {
           )}
 
           {/* Project Overview */}
-          <div className="mb-6">
+          <div className="">
             <ProjectOverview project={project} onDelete={onDeleteOpen} />
           </div>
 

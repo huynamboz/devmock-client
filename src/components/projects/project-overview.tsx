@@ -1,7 +1,8 @@
 import type { Project } from "@/types/project";
 
-import { Clock, Code2, Trash2 } from "lucide-react";
+import { Clock, Code2, MoreVertical, Trash2 } from "lucide-react";
 import { Button } from "@heroui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 
 import { title } from "@/components/primitives";
 
@@ -38,15 +39,27 @@ export function ProjectOverview({ project, onDelete }: ProjectOverviewProps) {
             </p>
           </div>
         </div>
-        <Button
-          color="danger"
-          size="md"
-          startContent={<Trash2 size={16} />}
-          variant="flat"
-          onPress={onDelete}
-        >
-          Delete
-        </Button>
+        <Popover placement="bottom-end">
+          <PopoverTrigger>
+            <Button isIconOnly size="md" variant="light">
+              <MoreVertical size={20} />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <div className="px-1 py-2 w-48">
+              <Button
+                className="w-full justify-start"
+                color="danger"
+                size="sm"
+                startContent={<Trash2 size={16} />}
+                variant="light"
+                onPress={onDelete}
+              >
+                Delete Project
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Divider */}
