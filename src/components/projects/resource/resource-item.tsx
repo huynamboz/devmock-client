@@ -96,7 +96,7 @@ export function ResourceItem({
   };
 
   return (
-    <div className="bg-white border border-primary/20 rounded-2xl p-4 hover:border-primary hover:shadow-sm transition-all duration-200">
+    <div className="bg-content1  border border-primary/20 rounded-2xl p-4 hover:border-primary hover:shadow-sm transition-all duration-200">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           {/* Icon & Name */}

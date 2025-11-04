@@ -74,10 +74,10 @@ export const Navbar = () => {
               className="w-6 h-6"
               src="/assets/images/logo.png"
             />
-            <p className="font-bold text-inherit">DevMock</p>
+            <p className="font-bold text-xl">DevMock</p>
           </Link>
         </NavbarBrand>
-        <div className="hidden lg:flex gap-4 justify-start ml-2">
+        <div className="hidden lg:flex gap-6 justify-start ml-2">
           {siteConfig.navItems.map((item) => (
             <NavbarItem key={item.href}>
               <Link
@@ -100,12 +100,6 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2">
-          <Link isExternal href={siteConfig.links.twitter} title="Twitter">
-            <Twitter className="text-default-500" size={20} />
-          </Link>
-          <Link isExternal href={siteConfig.links.discord} title="Discord">
-            <MessageCircle className="text-default-500" size={20} />
-          </Link>
           <Link isExternal href={siteConfig.links.github} title="GitHub">
             <Github className="text-default-500" size={20} />
           </Link>
