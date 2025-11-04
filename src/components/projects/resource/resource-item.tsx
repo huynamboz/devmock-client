@@ -36,7 +36,7 @@ export function ResourceItem({
     resource.recordCount,
   );
   const resourceName = resource.name;
-  const apiUrl = `https://${projectId}.devmock.dev/`;
+  const apiUrl = `https://api.devmock.dev/api/v1/pilot/${projectId}/`;
   const recordCount = resource.recordCount || 0;
 
   const handleGenerateRecords = async (count: number) => {

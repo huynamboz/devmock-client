@@ -217,12 +217,12 @@ export function APIShowcaseSection() {
             >
               {`// Fetch all users
 const users = await fetch(
-  'https://yourproject.devmock.dev/users'
+  'https://api.devmock.dev/api/v1/pilot/yourproject/users'
 ).then(r => r.json());
 
 // Create a new user
 const newUser = await fetch(
-  'https://yourproject.devmock.dev/users',
+  'https://api.devmock.dev/api/v1/pilot/yourproject/users',
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -235,7 +235,7 @@ const newUser = await fetch(
 
 // Update a user
 const updated = await fetch(
-  'https://yourproject.devmock.dev/users/123',
+  'https://api.devmock.dev/api/v1/pilot/yourproject/users/123',
   {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -245,7 +245,7 @@ const updated = await fetch(
 
 // Delete a user
 await fetch(
-  'https://yourproject.devmock.dev/users/123',
+  'https://api.devmock.dev/api/v1/pilot/yourproject/users/123',
   { method: 'DELETE' }
 );`}
             </SyntaxHighlighter>
