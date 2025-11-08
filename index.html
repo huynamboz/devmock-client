@@ -1,31 +1,148 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Basic Meta Tags -->
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DevMock - Create Mock APIs for Frontend Development</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    
+    <!-- Primary Meta Tags -->
+    <title>DevMock - Create Mock APIs & Mock Backend for Frontend Development</title>
     <meta
-      key="title"
-      content="DevMock - Create Mock APIs for Frontend Development"
-      property="og:title"
+      name="title"
+      content="DevMock - Create Mock APIs & Mock Backend for Frontend Development"
     />
     <meta
-      content="A lightweight mock backend + mock database built for Frontend Developers. Create data models, generate mock data, and call real REST APIs instantly while focusing entirely on UI development."
-      property="og:description"
-    />
-    <meta
-      content="A lightweight mock backend + mock database built for Frontend Developers. Create data models, generate mock data, and call real REST APIs instantly while focusing entirely on UI development."
       name="description"
+      content="A lightweight mock backend + mock database built for Frontend Developers. Create data models, generate mock data with Faker.js, and call real REST APIs instantly. No backend knowledge required."
     />
-    <meta content="website" property="og:type" />
-    <meta content="DevMock" name="application-name" />
     <meta
-      key="viewport"
-      content="viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
-      name="viewport"
+      name="keywords"
+      content="mock api, mock backend, mock database, fake api, rest api, api mocking, frontend development, faker.js, mock data generator, test api, development tools, api testing, mock server, fake backend, api builder"
     />
-    <link href="/assets/images/logo.png" rel="icon" />
+    <meta name="author" content="DevMock" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="theme-color" content="#006FEE" />
+    <meta name="application-name" content="DevMock" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://devmock.dev/" />
+    <meta
+      property="og:title"
+      content="DevMock - Create Mock APIs & Mock Backend for Frontend Development"
+    />
+    <meta
+      property="og:description"
+      content="A lightweight mock backend + mock database built for Frontend Developers. Create data models, generate mock data with Faker.js, and call real REST APIs instantly. No backend knowledge required."
+    />
+    <meta property="og:image" content="/assets/images/og-image_compressed.png" />
+    <meta property="og:image:width" content="3358" />
+    <meta property="og:image:height" content="1778" />
+    <meta property="og:image:alt" content="DevMock - Mock API Builder for Frontend Developers" />
+    <meta property="og:site_name" content="DevMock" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://devmock.dev/" />
+    <meta
+      name="twitter:title"
+      content="DevMock - Create Mock APIs & Mock Backend for Frontend Development"
+    />
+    <meta
+      name="twitter:description"
+      content="A lightweight mock backend + mock database built for Frontend Developers. Create data models, generate mock data with Faker.js, and call real REST APIs instantly."
+    />
+    <meta name="twitter:image" content="/assets/images/og-image_compressed.png" />
+    <meta name="twitter:image:width" content="3358" />
+    <meta name="twitter:image:height" content="1778" />
+    <meta name="twitter:image:alt" content="DevMock - Mock API Builder for Frontend Developers" />
+    <meta name="twitter:creator" content="@devmock" />
+    <meta name="twitter:site" content="@devmock" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/logo.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/logo.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/logo.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/logo.ico" />
+    <link rel="manifest" href="/site.webmanifest" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://devmock.dev/" />
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://api.devmock.dev" />
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "DevMock",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5",
+        "ratingCount": "1"
+      },
+      "description": "A lightweight mock backend + mock database built for Frontend Developers. Create data models, generate mock data with Faker.js, and call real REST APIs instantly.",
+      "url": "https://devmock.dev",
+      "author": {
+        "@type": "Organization",
+        "name": "DevMock"
+      },
+      "featureList": [
+        "Create Mock APIs",
+        "Mock Backend",
+        "Mock Database",
+        "Faker.js Integration",
+        "REST API Endpoints",
+        "Data Model Builder",
+        "Mock Data Generator"
+      ]
+    }
+    </script>
+    
+    <!-- Additional Structured Data for Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "DevMock",
+      "url": "https://devmock.dev",
+      "logo": "https://devmock.dev/assets/images/logo.ico",
+      "description": "Create Mock APIs & Mock Backend for Frontend Development",
+      "sameAs": [
+        "https://github.com/huynamboz"
+      ]
+    }
+    </script>
+    
+    <!-- Additional Structured Data for WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "DevMock",
+      "url": "https://devmock.dev",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://devmock.dev/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
