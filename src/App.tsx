@@ -20,7 +20,6 @@ function App() {
       {/* Protected Layout - chỉ check auth 1 lần */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DocsPage />} path="/docs" />
-        <Route element={<PricingPage />} path="/pricing" />
         <Route element={<BlogPage />} path="/blog" />
         <Route element={<AboutPage />} path="/about" />
         <Route element={<ProjectsPage />} path="/projects" />
@@ -29,6 +28,7 @@ function App() {
 
       {/* Public Layout */}
       <Route element={<PublicRoute />}>
+        <Route element={<PricingPage />} path="/pricing" />
         <Route element={<IndexPage />} path="/" />
         <Route element={<LoginPage />} path="/login" />
         <Route element={<RegisterPage />} path="/register" />
