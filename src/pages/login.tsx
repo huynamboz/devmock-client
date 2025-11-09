@@ -1,5 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import type { CredentialResponse } from "@react-oauth/google";
+
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { Link } from "@heroui/link";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -8,39 +11,6 @@ import { title } from "@/components/primitives";
 import { GOOGLE_CLIENT_ID } from "@/config/api";
 import { useAuthStore } from "@/stores/auth.store";
 import DefaultLayout from "@/layouts/default";
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        oauth2: {
-          initTokenClient: (config: {
-            client_id: string;
-            scope: string;
-            callback: (response: { access_token: string }) => void;
-          }) => {
-            requestAccessToken: () => void;
-          };
-        };
-        id: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: { credential: string }) => void;
-          }) => void;
-          renderButton: (
-            element: HTMLElement,
-            config: {
-              theme: string;
-              size: string;
-              text: string;
-              width?: string;
-            },
-          ) => void;
-        };
-      };
-    };
-  }
-}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -52,89 +22,43 @@ export default function LoginPage() {
   const googleLogin = useAuthStore((state) => state.googleLogin);
   const navigate = useNavigate();
   const location = useLocation();
-  const googleButtonRef = useRef<HTMLDivElement>(null);
 
-  const handleGoogleCredentialResponse = useCallback(
-    async (response: { credential: string }) => {
-      setIsGoogleLoading(true);
-      setError("");
-
-      try {
-        // response.credential is the ID token we need
-        await googleLogin(response.credential);
-
-        // Redirect to the page user was trying to access, or home page
-        const from =
-          (location.state as { from?: Location })?.from?.pathname || "/";
-
-        navigate(from, { replace: true });
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Google login failed. Please try again.",
-        );
-      } finally {
-        setIsGoogleLoading(false);
-      }
-    },
-    [googleLogin, location, navigate],
-  );
-
-  useEffect(() => {
-    if (!GOOGLE_CLIENT_ID || !googleButtonRef.current) {
-      return;
-    }
-
-    const initializeGoogleSignIn = () => {
-      if (window.google && googleButtonRef.current) {
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleGoogleCredentialResponse,
-        });
-
-        window.google.accounts.id.renderButton(googleButtonRef.current, {
-          theme: "outline",
-          size: "large",
-          text: "signin_with",
-          width: "100%",
-        });
-      }
-    };
-
-    // Check if script is already loaded
-    if (window.google) {
-      initializeGoogleSignIn();
+  const handleGoogleSuccess = async (
+    credentialResponse: CredentialResponse,
+  ) => {
+    if (!credentialResponse.credential) {
+      setError("Google login failed. No credential received.");
 
       return;
     }
 
-    // Load Google Identity Services script
-    const existingScript = document.querySelector(
-      'script[src="https://accounts.google.com/gsi/client"]',
-    );
+    setIsGoogleLoading(true);
+    setError("");
 
-    if (existingScript) {
-      // Wait for script to load
-      existingScript.addEventListener("load", initializeGoogleSignIn);
+    try {
+      // credentialResponse.credential is the ID token we need
+      await googleLogin(credentialResponse.credential);
 
-      return () => {
-        existingScript.removeEventListener("load", initializeGoogleSignIn);
-      };
+      // Redirect to the page user was trying to access, or home page
+      const from =
+        (location.state as { from?: Location })?.from?.pathname || "/";
+
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Google login failed. Please try again.",
+      );
+    } finally {
+      setIsGoogleLoading(false);
     }
+  };
 
-    const script = document.createElement("script");
-
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-
-    script.onload = initializeGoogleSignIn;
-
-    document.body.appendChild(script);
-
-    // Don't remove script on cleanup as it may be used by other components
-  }, [handleGoogleCredentialResponse]);
+  const handleGoogleError = () => {
+    setError("Google login failed. Please try again.");
+    setIsGoogleLoading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -247,14 +171,23 @@ export default function LoginPage() {
                   <div className="flex-1 h-px bg-default-200" />
                 </div>
 
-                <div className="w-full">
-                  <div ref={googleButtonRef} className="flex justify-center" />
-                  {isGoogleLoading && (
-                    <div className="mt-2 text-sm text-center text-default-500">
-                      Signing in with Google...
-                    </div>
-                  )}
+                <div className="w-full flex justify-center">
+                  <GoogleLogin
+                    shape="rectangular"
+                    size="large"
+                    text="signin_with"
+                    theme="outline"
+                    useOneTap={false}
+                    width="100%"
+                    onError={handleGoogleError}
+                    onSuccess={handleGoogleSuccess}
+                  />
                 </div>
+                {isGoogleLoading && (
+                  <div className="mt-2 text-sm text-center text-default-500">
+                    Signing in with Google...
+                  </div>
+                )}
               </>
             )}
 
