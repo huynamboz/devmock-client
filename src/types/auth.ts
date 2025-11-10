@@ -2,11 +2,12 @@ export type UserRole = "USER" | "ADMIN";
 export type Provider = "LOCAL" | "GOOGLE";
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
   name: string | null;
   role: UserRole;
   provider: Provider;
+  googleId: string | null;
   address: string | null;
   isActive: boolean;
   createdAt: string;
@@ -43,3 +44,7 @@ export interface GoogleLoginRequest {
   idToken: string;
 }
 
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}

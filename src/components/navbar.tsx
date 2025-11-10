@@ -1,4 +1,4 @@
-import { LogOut, Github, Search, User, ArrowRight } from "lucide-react";
+import { LogOut, Github, Search, User, ArrowRight, Lock } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
@@ -16,16 +16,23 @@ import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom";
+import { useDisclosure } from "@heroui/modal";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { useAuthStore } from "@/stores/auth.store";
+import { ChangePasswordModal } from "@/components/change-password-modal";
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const logout = useAuthStore((state) => state.logout);
+  const {
+    isOpen: isChangePasswordOpen,
+    onOpen: onChangePasswordOpen,
+    onClose: onChangePasswordClose,
+  } = useDisclosure();
 
   const handleLogout = async () => {
     await logout();
@@ -56,7 +63,12 @@ export const Navbar = () => {
   );
 
   return (
-    <HeroUINavbar isBordered={true} maxWidth="xl" position="static" className="px-2 sm:px-4">
+    <HeroUINavbar
+      className="px-2 sm:px-4"
+      isBordered={true}
+      maxWidth="xl"
+      position="static"
+    >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand className="gap-2 sm:gap-3 max-w-fit">
           <Link
@@ -103,10 +115,10 @@ export const Navbar = () => {
         {!isAuthenticated && (
           <NavbarItem className="hidden md:flex">
             <Button
+              className="text-xs sm:text-sm"
               color="primary"
               endContent={<ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
               size="sm"
-              className="text-xs sm:text-sm"
               onPress={() => navigate("/projects")}
             >
               Get Started
@@ -119,13 +131,11 @@ export const Navbar = () => {
               <PopoverTrigger>
                 <Button
                   className="bg-default-100 text-xs sm:text-sm max-w-[120px] sm:max-w-none"
+                  size="sm"
                   startContent={<User className="text-default-600" size={14} />}
                   variant="flat"
-                  size="sm"
                 >
-                  <span className="truncate">
-                    {user.name || user.email}
-                  </span>
+                  <span className="truncate">{user.name || user.email}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent>
@@ -142,6 +152,20 @@ export const Navbar = () => {
                       )}
                     </div>
                     <div className="border-t border-default-200" />
+                    {user.provider === "LOCAL" && (
+                      <Button
+                        className="justify-start"
+                        color="default"
+                        size="sm"
+                        startContent={
+                          <Lock className="text-default-500" size={16} />
+                        }
+                        variant="light"
+                        onPress={onChangePasswordOpen}
+                      >
+                        Change Password
+                      </Button>
+                    )}
                     <Button
                       className="justify-start"
                       color="danger"
@@ -158,21 +182,25 @@ export const Navbar = () => {
                 </div>
               </PopoverContent>
             </Popover>
+            <ChangePasswordModal
+              isOpen={isChangePasswordOpen}
+              onClose={onChangePasswordClose}
+            />
           </NavbarItem>
         )}
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-2" justify="end">
-        <Link isExternal href={siteConfig.links.github} className="min-w-fit">
+        <Link isExternal className="min-w-fit" href={siteConfig.links.github}>
           <Github className="text-default-500" size={18} />
         </Link>
         <ThemeSwitch />
         {!isAuthenticated && (
           <Button
+            className="text-xs px-2"
             color="primary"
             endContent={<ArrowRight className="h-3.5 w-3.5" />}
             size="sm"
-            className="text-xs px-2"
             onPress={() => navigate("/projects")}
           >
             <span className="hidden xs:inline">Get Started</span>
@@ -180,47 +208,67 @@ export const Navbar = () => {
           </Button>
         )}
         {isAuthenticated && user && (
-          <Popover placement="bottom-end">
-            <PopoverTrigger>
-              <Button
-                isIconOnly
-                className="bg-default-100 min-w-fit"
-                variant="flat"
-                size="sm"
-              >
-                <User className="text-default-600" size={18} />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent>
-              <div className="px-1 py-2 w-64">
-                <div className="flex flex-col gap-2">
-                  <div className="px-2 py-1">
-                    <p className="text-sm font-semibold text-default-900 truncate">
-                      {user.name || "User"}
-                    </p>
-                    {user.email && (
-                      <p className="text-xs text-default-500 truncate">
-                        {user.email}
+          <>
+            <Popover placement="bottom-end">
+              <PopoverTrigger>
+                <Button
+                  isIconOnly
+                  className="bg-default-100 min-w-fit"
+                  size="sm"
+                  variant="flat"
+                >
+                  <User className="text-default-600" size={18} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <div className="px-1 py-2 w-64">
+                  <div className="flex flex-col gap-2">
+                    <div className="px-2 py-1">
+                      <p className="text-sm font-semibold text-default-900 truncate">
+                        {user.name || "User"}
                       </p>
+                      {user.email && (
+                        <p className="text-xs text-default-500 truncate">
+                          {user.email}
+                        </p>
+                      )}
+                    </div>
+                    <div className="border-t border-default-200" />
+                    {user.provider === "LOCAL" && (
+                      <Button
+                        className="justify-start"
+                        color="default"
+                        size="sm"
+                        startContent={
+                          <Lock className="text-default-500" size={16} />
+                        }
+                        variant="light"
+                        onPress={onChangePasswordOpen}
+                      >
+                        Change Password
+                      </Button>
                     )}
+                    <Button
+                      className="justify-start"
+                      color="danger"
+                      size="sm"
+                      startContent={
+                        <LogOut className="text-default-500" size={16} />
+                      }
+                      variant="light"
+                      onPress={handleLogout}
+                    >
+                      Logout
+                    </Button>
                   </div>
-                  <div className="border-t border-default-200" />
-                  <Button
-                    className="justify-start"
-                    color="danger"
-                    size="sm"
-                    startContent={
-                      <LogOut className="text-default-500" size={16} />
-                    }
-                    variant="light"
-                    onPress={handleLogout}
-                  >
-                    Logout
-                  </Button>
                 </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverContent>
+            </Popover>
+            <ChangePasswordModal
+              isOpen={isChangePasswordOpen}
+              onClose={onChangePasswordClose}
+            />
+          </>
         )}
         <NavbarMenuToggle className="min-w-fit" />
       </NavbarContent>
@@ -241,28 +289,50 @@ export const Navbar = () => {
           </div>
         )}
         {isAuthenticated && user && (
-          <div className="mx-4 mt-2 mb-2 pb-2 border-b border-default-200">
-            <div className="flex flex-col gap-2">
-              <p className="text-sm font-semibold text-default-900">
-                {user.name || "User"}
-              </p>
-              {user.email && (
-                <p className="text-xs text-default-500 truncate">
-                  {user.email}
+          <>
+            <div className="mx-4 mt-2 mb-2 pb-2 border-b border-default-200">
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-semibold text-default-900">
+                  {user.name || "User"}
                 </p>
-              )}
-              <Button
-                className="justify-start mt-2"
-                color="danger"
-                size="sm"
-                startContent={<LogOut className="text-default-500" size={16} />}
-                variant="light"
-                onPress={handleLogout}
-              >
-                Logout
-              </Button>
+                {user.email && (
+                  <p className="text-xs text-default-500 truncate">
+                    {user.email}
+                  </p>
+                )}
+                {user.provider === "LOCAL" && (
+                  <Button
+                    className="justify-start mt-2"
+                    color="default"
+                    size="sm"
+                    startContent={
+                      <Lock className="text-default-500" size={16} />
+                    }
+                    variant="light"
+                    onPress={onChangePasswordOpen}
+                  >
+                    Change Password
+                  </Button>
+                )}
+                <Button
+                  className="justify-start mt-2"
+                  color="danger"
+                  size="sm"
+                  startContent={
+                    <LogOut className="text-default-500" size={16} />
+                  }
+                  variant="light"
+                  onPress={handleLogout}
+                >
+                  Logout
+                </Button>
+              </div>
             </div>
-          </div>
+            <ChangePasswordModal
+              isOpen={isChangePasswordOpen}
+              onClose={onChangePasswordClose}
+            />
+          </>
         )}
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navMenuItems.map((item, index) => (

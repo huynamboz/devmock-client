@@ -1,11 +1,13 @@
-import { apiClient } from "@/lib/api-client";
 import type {
   AuthResponse,
+  ChangePasswordRequest,
   GoogleLoginRequest,
   LoginRequest,
   RegisterRequest,
   User,
 } from "@/types/auth";
+
+import { apiClient } from "@/lib/api-client";
 
 class AuthService {
   /**
@@ -13,6 +15,7 @@ class AuthService {
    */
   async register(data: RegisterRequest): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>("/auth/register", data);
+
     return response.data;
   }
 
@@ -21,6 +24,7 @@ class AuthService {
    */
   async login(data: LoginRequest): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>("/auth/login", data);
+
     return response.data;
   }
 
@@ -29,6 +33,7 @@ class AuthService {
    */
   async googleLogin(data: GoogleLoginRequest): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>("/auth/google", data);
+
     return response.data;
   }
 
@@ -37,6 +42,7 @@ class AuthService {
    */
   async getCurrentUser(): Promise<User> {
     const response = await apiClient.get<User>("/auth/me");
+
     return response.data;
   }
 
@@ -48,6 +54,13 @@ class AuthService {
   }
 
   /**
+   * Change password (only for LOCAL accounts)
+   */
+  async changePassword(data: ChangePasswordRequest): Promise<void> {
+    await apiClient.post("/auth/change-password", data);
+  }
+
+  /**
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {
@@ -56,4 +69,3 @@ class AuthService {
 }
 
 export const authService = new AuthService();
-
