@@ -5,23 +5,19 @@ import {
   Globe,
   Lock,
   CheckCircle,
-  XCircle,
   TrendingUp,
   Calendar,
   Clock,
 } from "lucide-react";
 
-import { usersService, type UserStats } from "@/services/users.service";
+import { type UserStats } from "@/services/users.service";
 
 interface UserStatsSectionProps {
   stats: UserStats | null;
   isLoading: boolean;
 }
 
-export function UserStatsSection({
-  stats,
-  isLoading,
-}: UserStatsSectionProps) {
+export function UserStatsSection({ stats, isLoading }: UserStatsSectionProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -269,4 +265,3 @@ export function UserStatsSection({
     </div>
   );
 }
-
