@@ -35,11 +35,11 @@ function App() {
 
       {/* Public Layout */}
       <Route element={<PublicRoute />}>
-        <Route element={<PricingPage />} path="/pricing" />
         <Route element={<IndexPage />} path="/" />
         <Route element={<LoginPage />} path="/login" />
         <Route element={<RegisterPage />} path="/register" />
       </Route>
+      <Route element={<PricingPage />} path="/pricing" />
     </Routes>
   );
 }
