@@ -9,12 +9,16 @@ export interface GetUsersParams {
   isActive?: boolean;
 }
 
-export interface GetUsersResponse {
-  users: User[];
+export interface GetUsersMeta {
   total: number;
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface GetUsersResponse {
+  data: User[];
+  meta: GetUsersMeta;
 }
 
 export interface UserStats {
@@ -45,27 +49,13 @@ class UsersService {
    * Get all users with pagination and filters
    */
   async getAll(params?: GetUsersParams): Promise<GetUsersResponse> {
-    const response = await apiClient.get<GetUsersResponse | User[]>(
+    const response = await apiClient.get<GetUsersResponse>(
       this.baseURL,
       {
         params,
       },
     );
 
-    // Handle case where API returns array directly
-    if (Array.isArray(response.data)) {
-      return {
-        users: response.data,
-        total: response.data.length,
-        page: params?.page || 1,
-        limit: params?.limit || 10,
-        totalPages: Math.ceil(
-          response.data.length / (params?.limit || 10),
-        ),
-      };
-    }
-
-    // Handle case where API returns object with users property
     return response.data;
   }
 

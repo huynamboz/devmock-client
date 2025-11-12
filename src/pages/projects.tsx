@@ -206,7 +206,7 @@ export default function ProjectsPage() {
                     <div className="flex items-center gap-1 text-sm text-default-600">
                       <Folder className="h-4 w-4" />
                       <span>
-                        {project.resources?.length || 0} resource
+                        {project.resourceCount || 0} resource
                         {(project.resources?.length || 0) !== 1 ? "s" : ""}
                       </span>
                     </div>

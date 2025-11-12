@@ -101,9 +101,9 @@ export default function AdminUsersPage() {
 
       const response = await usersService.getAll(params);
 
-      setUsers(response.users || []);
-      setTotal(response.total || 0);
-      setTotalPages(response.totalPages || 1);
+      setUsers(response.data || []);
+      setTotal(response.meta?.total || 0);
+      setTotalPages(response.meta?.totalPages || 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load users.");
     } finally {

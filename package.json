@@ -20,6 +20,7 @@
     "@heroui/modal": "^2.2.24",
     "@heroui/navbar": "2.2.25",
     "@heroui/popover": "^2.3.27",
+    "@heroui/scroll-shadow": "^2.3.18",
     "@heroui/select": "^2.4.28",
     "@heroui/slider": "^2.4.24",
     "@heroui/snippet": "2.2.28",

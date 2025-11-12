@@ -1,7 +1,15 @@
 import type { Resource } from "@/types/project";
 
 import { useState } from "react";
-import { Check, Copy, Database, Edit, Eye, Trash2 } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Database,
+  Edit,
+  Eye,
+  Settings,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@heroui/button";
 import { Slider } from "@heroui/slider";
 import { addToast } from "@heroui/toast";
@@ -16,6 +24,7 @@ interface ResourceItemProps {
   onCopy: (resourceName: string) => void;
   onDelete?: (resourceId: string, resourceName: string) => void;
   onEdit?: (resourceId: string) => void;
+  onSettings?: (resourceId: string) => void;
   onGenerateSuccess?: () => void;
   onSliderValueChange?: (resourceName: string, value: number) => void;
   onViewData?: (resourceName: string) => void;
@@ -28,6 +37,7 @@ export function ResourceItem({
   onCopy,
   onDelete,
   onEdit,
+  onSettings,
   onGenerateSuccess,
   onViewData,
 }: ResourceItemProps) {
@@ -36,7 +46,7 @@ export function ResourceItem({
     resource.recordCount,
   );
   const resourceName = resource.name;
-  const apiUrl = `https://api.devmock.dev/api/v1/pilot/${projectId}/`;
+  const apiUrl = `${import.meta.env.VITE_API_BASE_MOCK_URL}/${projectId}/`;
   const recordCount = resource.recordCount || 0;
 
   const handleGenerateRecords = async (count: number) => {
@@ -158,16 +168,26 @@ export function ResourceItem({
                 Edit
               </Button>
             )}
+            {onSettings && (
+              <Button
+                color="default"
+                size="sm"
+                startContent={<Settings className="h-3.5 w-3.5" />}
+                variant="light"
+                onPress={() => onSettings(resource.id)}
+              >
+                Settings
+              </Button>
+            )}
             {onDelete && (
               <Button
+                isIconOnly
                 color="danger"
                 size="sm"
                 startContent={<Trash2 className="h-3.5 w-3.5" />}
                 variant="light"
                 onPress={() => onDelete(resource.id, resourceName)}
-              >
-                Delete
-              </Button>
+              />
             )}
           </div>
         </div>

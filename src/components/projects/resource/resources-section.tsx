@@ -6,6 +6,7 @@ import { Button } from "@heroui/button";
 import { useDisclosure } from "@heroui/modal";
 
 import { ResourceItem } from "./resource-item";
+import { ResourceSettingsModal } from "./resource-settings-modal";
 import { ViewDataModal } from "./view-data-modal";
 
 import { title } from "@/components/primitives";
@@ -15,6 +16,7 @@ interface ResourcesSectionProps {
   onCreateResource: () => void;
   onDelete?: (resourceId: string, resourceName: string) => void;
   onEdit?: (resourceId: string) => void;
+  onSettings?: (resourceId: string) => void;
   onViewData?: (resourceName: string) => void;
   onGenerateSuccess?: () => void;
 }
@@ -24,6 +26,7 @@ export function ResourcesSection({
   onCreateResource,
   onDelete,
   onEdit,
+  onSettings,
   onViewData,
   onGenerateSuccess,
 }: ResourcesSectionProps) {
@@ -31,10 +34,21 @@ export function ResourcesSection({
   const [viewingResourceName, setViewingResourceName] = useState<string | null>(
     null,
   );
+  const [settingsResourceId, setSettingsResourceId] = useState<string | null>(
+    null,
+  );
+  const [settingsResourceName, setSettingsResourceName] = useState<
+    string | undefined
+  >(undefined);
   const {
     isOpen: isViewDataOpen,
     onOpen: onViewDataOpen,
     onClose: onViewDataClose,
+  } = useDisclosure();
+  const {
+    isOpen: isSettingsOpen,
+    onOpen: onSettingsOpen,
+    onClose: onSettingsClose,
   } = useDisclosure();
 
   const handleCopyApiUrl = async (resourceName: string) => {
@@ -42,7 +56,7 @@ export function ResourcesSection({
       return;
     }
 
-    const apiUrl = `https://api.devmock.dev/api/v1/pilot/${project.id}/${resourceName}`;
+    const apiUrl = `${import.meta.env.VITE_API_BASE_MOCK_URL}/${project.id}/${resourceName}`;
 
     try {
       await navigator.clipboard.writeText(apiUrl);
@@ -108,6 +122,16 @@ export function ResourcesSection({
               onDelete={onDelete}
               onEdit={onEdit}
               onGenerateSuccess={onGenerateSuccess}
+              onSettings={(resourceId) => {
+                const resource = project.resources?.find(
+                  (r) => r.id === resourceId,
+                );
+
+                setSettingsResourceId(resourceId);
+                setSettingsResourceName(resource?.name);
+                onSettingsOpen();
+                onSettings?.(resourceId);
+              }}
               onViewData={(resourceName) => {
                 setViewingResourceName(resourceName);
                 onViewDataOpen();
@@ -130,6 +154,23 @@ export function ResourcesSection({
           }}
         />
       )}
+
+      {/* Resource Settings Modal */}
+      <ResourceSettingsModal
+        isOpen={isSettingsOpen}
+        projectId={project.id}
+        resourceId={settingsResourceId}
+        resourceName={settingsResourceName}
+        onClose={() => {
+          setSettingsResourceId(null);
+          setSettingsResourceName(undefined);
+          onSettingsClose();
+        }}
+        onSuccess={() => {
+          // Optional: Refresh project if needed after updating settings
+          // This could trigger a reload of the project data
+        }}
+      />
     </div>
   );
 }

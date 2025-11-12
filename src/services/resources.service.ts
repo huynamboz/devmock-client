@@ -1,7 +1,9 @@
 import type {
   CreateResourceRequest,
   Resource,
+  ResourceWithSettings,
   UpdateResourceRequest,
+  UpdateResourceSettingsRequest,
 } from "@/types/project";
 
 import { apiClient } from "@/lib/api-client";
@@ -79,6 +81,22 @@ class ResourcesService {
     }>(`${this.baseURL}/${projectId}/resources/check-name`, {
       params: { name },
     });
+
+    return response.data;
+  }
+
+  /**
+   * Update resource API settings
+   * Endpoint: PUT /api/v1/resources/:resourceId/settings
+   */
+  async updateSettings(
+    resourceId: string,
+    data: UpdateResourceSettingsRequest,
+  ): Promise<ResourceWithSettings> {
+    const response = await apiClient.put<ResourceWithSettings>(
+      `/resources/${resourceId}/settings`,
+      data,
+    );
 
     return response.data;
   }

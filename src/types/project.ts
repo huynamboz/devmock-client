@@ -21,6 +21,7 @@ export interface Project {
   id: string;
   ownerId: string;
   name: string;
+  resourceCount?: number;
   createdAt: string;
   updatedAt: string;
   resources?: Resource[];
@@ -49,4 +50,27 @@ export interface UpdateResourceRequest {
     fakerType?: string | null;
   }>;
   jsonTemplate?: string;
+}
+
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export interface MethodSetting {
+  enabled: boolean;
+  delay: number; // 0-10000ms
+}
+
+export interface ResourceApiSettings {
+  [key: string]: MethodSetting;
+}
+
+export interface UpdateResourceSettingsRequest {
+  GET?: MethodSetting;
+  POST?: MethodSetting;
+  PUT?: MethodSetting;
+  PATCH?: MethodSetting;
+  DELETE?: MethodSetting;
+}
+
+export interface ResourceWithSettings extends Resource {
+  apiSettings?: ResourceApiSettings;
 }

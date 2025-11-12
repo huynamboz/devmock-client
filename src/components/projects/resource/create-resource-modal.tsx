@@ -484,15 +484,6 @@ export function CreateResourceModal({
                   Define the properties for your resource
                 </p>
               </div>
-              <Button
-                color="primary"
-                size="sm"
-                startContent={<Plus size={16} />}
-                variant="flat"
-                onPress={handleAddField}
-              >
-                Add Field
-              </Button>
             </div>
 
             {fields.length === 0 ||
