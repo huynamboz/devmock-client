@@ -12,7 +12,7 @@ export interface Resource {
   type?: string;
   data?: unknown; // Legacy field, may be present in list response
   fields?: ResourceField[]; // Fields array from detail response
-  recordCount?: number; // Number of records in this resource
+  recordCount?: number;
   createdAt: string;
   updatedAt: string;
 }
