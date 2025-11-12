@@ -1,14 +1,21 @@
+import { useState, useRef } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Tabs, Tab } from "@heroui/tabs";
+import { addToast } from "@heroui/toast";
 
 import { title } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
 import { POLAR_CONFIG } from "@/config/api";
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 
+type Currency = "USD" | "VND";
+
 interface PricingPlan {
   name: string;
   price: string;
+  priceVND?: string;
   period: string;
   description: string;
   features: string[];
@@ -24,7 +31,9 @@ interface PricingPlan {
     | "danger";
   isPopular?: boolean;
   monthlyPrice?: number;
+  monthlyPriceVND?: number;
   originalPrice?: number;
+  originalPriceVND?: number;
   polarProductId?: string; // Polar.sh product ID
 }
 
@@ -49,9 +58,11 @@ const pricingPlans: PricingPlan[] = [
   {
     name: "Pro Monthly",
     price: "$2.99",
+    priceVND: "20.000₫",
     period: "per month",
     description: "For real portfolio projects and side projects",
     monthlyPrice: 2.99,
+    monthlyPriceVND: 20000,
     polarProductId: import.meta.env.VITE_POLAR_PRODUCT_MONTHLY || "",
     features: [
       "Everything in Free",
@@ -70,10 +81,13 @@ const pricingPlans: PricingPlan[] = [
   {
     name: "Pro Yearly",
     price: "$11.99",
+    priceVND: "40.000₫",
     period: "per year",
     description: "Save 75% with annual billing",
     monthlyPrice: 2.99,
+    monthlyPriceVND: 3333,
     originalPrice: 11.99,
+    originalPriceVND: 24000,
     polarProductId: import.meta.env.VITE_POLAR_PRODUCT_YEARLY || "",
     features: [
       "Everything in Pro Monthly",
@@ -90,7 +104,84 @@ const pricingPlans: PricingPlan[] = [
   },
 ];
 
+const lifetimePlan: PricingPlan = {
+  name: "Lifetime",
+  price: "$50",
+  priceVND: "50.000₫",
+  period: "one-time",
+  description: "Pay once, use forever. Best value for long-term projects",
+  features: [
+    "Everything in Pro Yearly",
+    "Lifetime access",
+    "All future features included",
+    "Priority support forever",
+    "No recurring charges",
+    "Best value for long-term use",
+  ],
+  isCurrent: false,
+  buttonText: "Coming Soon",
+  buttonVariant: "solid",
+  buttonColor: "secondary",
+  isPopular: true,
+};
+
 export default function PricingPage() {
+  const [currency, setCurrency] = useState<Currency>("VND");
+  const [discountCode, setDiscountCode] = useState("");
+  const [showLifetimePlan, setShowLifetimePlan] = useState(false);
+  const pricingCardsRef = useRef<HTMLDivElement>(null);
+
+  const handleDiscountCodeChange = (value: string) => {
+    setDiscountCode(value);
+  };
+
+  const handleSubmitDiscountCode = () => {
+    const code = discountCode.trim().toLowerCase();
+
+    if (code === "j2team") {
+      setShowLifetimePlan(true);
+
+      addToast({
+        title: "Discount code applied!",
+        description: "Lifetime plan is now available. Scroll down to see it.",
+        color: "success",
+        variant: "flat",
+      });
+
+      // Scroll to pricing cards after a short delay to ensure DOM is updated
+      setTimeout(() => {
+        pricingCardsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+    } else if (code) {
+      setShowLifetimePlan(false);
+
+      addToast({
+        title: "Invalid discount code",
+        description: "The discount code you entered is not valid.",
+        color: "warning",
+        variant: "flat",
+      });
+    } else {
+      setShowLifetimePlan(false);
+
+      addToast({
+        title: "Please enter a discount code",
+        description: "Enter a valid discount code to unlock special offers.",
+        color: "default",
+        variant: "flat",
+      });
+    }
+  };
+
+  const handleDiscountKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSubmitDiscountCode();
+    }
+  };
+
   const handleCheckout = (plan: PricingPlan) => {
     if (!plan.polarProductId || !POLAR_CONFIG.organization) {
       // Fallback: redirect to contact or show message
@@ -107,10 +198,14 @@ export default function PricingPage() {
     window.open(checkoutUrl, "_blank");
   };
 
+  const displayPlans = showLifetimePlan
+    ? [...pricingPlans, lifetimePlan]
+    : pricingPlans;
+
   return (
     <DefaultLayout>
       <div className="background-grid flex-grow">
-        <BackgroundRippleEffect cellSize={50}/>
+        <BackgroundRippleEffect cellSize={50} />
         <div className="container relative z-10 mx-auto max-w-7xl px-6 py-12 md:py-16">
           {/* Header */}
           <div className="text-center mb-12">
@@ -121,15 +216,65 @@ export default function PricingPage() {
               Choose the plan that fits your needs. All plans include our core
               features for building mock APIs.
             </p>
+
+            {/* Currency Tabs */}
+            <div className="flex justify-center mt-6">
+              <Tabs
+                selectedKey={currency}
+                onSelectionChange={(key) => setCurrency(key as Currency)}
+              >
+                <Tab
+                  key="USD"
+                  title={
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🇺🇸</span>
+                      <span>USD</span>
+                    </div>
+                  }
+                />
+                <Tab
+                  key="VND"
+                  title={
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🇻🇳</span>
+                      <span>VND</span>
+                    </div>
+                  }
+                />
+              </Tabs>
+            </div>
+
+            {/* Discount Code Input */}
+            <div className="flex justify-center items-center gap-2 mt-4">
+              <Input
+                className="max-w-[300px]"
+                placeholder="Enter discount code"
+                size="md"
+                value={discountCode}
+                variant="bordered"
+                onKeyDown={handleDiscountKeyPress}
+                onValueChange={handleDiscountCodeChange}
+              />
+              <Button
+                color="primary"
+                size="md"
+                onPress={handleSubmitDiscountCode}
+              >
+                Submit
+              </Button>
+            </div>
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-            {pricingPlans.map((plan) => (
+          <div
+            ref={pricingCardsRef}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch"
+          >
+            {displayPlans.map((plan) => (
               <div
                 key={plan.name}
                 className={`relative group transition-all duration-300 flex ${
-                  plan.isPopular ? "md:-mt-4 md:mb-4" : ""
+                  plan.isPopular ? "md:mt-4 md:mb-4" : ""
                 }`}
               >
                 <div
@@ -159,19 +304,33 @@ export default function PricingPage() {
                     <h3 className="text-2xl font-bold mb-3">{plan.name}</h3>
                     <div className="flex flex-col gap-1 mb-3">
                       <div className="flex items-baseline gap-2">
-                        <span className="text-5xl font-bold">{plan.price}</span>
+                        <span className="text-5xl font-bold">
+                          {currency === "VND" && plan.priceVND
+                            ? plan.priceVND
+                            : plan.price}
+                        </span>
                         {plan.period && (
                           <span className="text-default-500 text-base">
                             {plan.period}
                           </span>
                         )}
                       </div>
-                      {plan.monthlyPrice && (
-                        <span className="text-sm text-default-500 font-medium">
-                          ${plan.monthlyPrice.toFixed(2)}/month
-                        </span>
-                      )}
-                      {plan.originalPrice && (
+                      {plan.monthlyPrice &&
+                        currency === "USD" &&
+                        plan.monthlyPrice && (
+                          <span className="text-sm text-default-500 font-medium">
+                            ${plan.monthlyPrice.toFixed(2)}/month
+                          </span>
+                        )}
+                      {plan.monthlyPriceVND &&
+                        currency === "VND" &&
+                        plan.monthlyPriceVND && (
+                          <span className="text-sm text-default-500 font-medium">
+                            {plan.monthlyPriceVND.toLocaleString("vi-VN")}₫
+                            /month
+                          </span>
+                        )}
+                      {plan.originalPrice && currency === "USD" && (
                         <div className="flex items-center gap-2 mt-2">
                           <span className="text-sm text-default-400 line-through">
                             ${plan.originalPrice}/year
@@ -182,6 +341,24 @@ export default function PricingPage() {
                               plan.originalPrice -
                               parseFloat(plan.price.replace("$", ""))
                             ).toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+                      {plan.originalPriceVND && currency === "VND" && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-sm text-default-400 line-through">
+                            {plan.originalPriceVND.toLocaleString("vi-VN")}₫
+                            /year
+                          </span>
+                          <span className="text-xs bg-success/20 text-success px-2 py-1 rounded-full font-semibold">
+                            Tiết kiệm{" "}
+                            {(
+                              plan.originalPriceVND -
+                              parseInt(
+                                plan.priceVND?.replace(/[₫,.]/g, "") || "0",
+                              )
+                            ).toLocaleString("vi-VN")}
+                            ₫
                           </span>
                         </div>
                       )}
@@ -216,20 +393,27 @@ export default function PricingPage() {
                       className="w-full font-semibold"
                       color={plan.buttonColor}
                       isDisabled={
-                        plan.isCurrent || plan.buttonText === "Coming Soon"
+                        plan.isCurrent ||
+                        (plan.buttonText === "Coming Soon" &&
+                          currency !== "VND")
                       }
                       size="lg"
                       variant={plan.buttonVariant}
                       onPress={() => {
                         if (
                           !plan.isCurrent &&
-                          plan.buttonText !== "Coming Soon"
+                          (plan.buttonText !== "Coming Soon" ||
+                            currency === "VND")
                         ) {
                           handleCheckout(plan);
                         }
                       }}
                     >
-                      {plan.buttonText}
+                      {currency === "VND" &&
+                      plan.buttonText === "Coming Soon" &&
+                      !plan.isCurrent
+                        ? "Upgrade Now"
+                        : plan.buttonText}
                     </Button>
                   </div>
                 </div>

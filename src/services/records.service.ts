@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api-client";
 
 export interface GenerateRecordsRequest {
   count: number;
+  locale?: string;
 }
 
 export interface GenerateRecordsResponse {

@@ -2,6 +2,7 @@ import type { Resource } from "@/types/project";
 
 import { useState } from "react";
 import {
+  AlertCircle,
   Check,
   Copy,
   Database,
@@ -11,7 +12,9 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@heroui/button";
+import { Select, SelectItem } from "@heroui/select";
 import { Slider } from "@heroui/slider";
+import { Tooltip } from "@heroui/tooltip";
 import { addToast } from "@heroui/toast";
 
 import { recordsService } from "@/services/records.service";
@@ -30,6 +33,24 @@ interface ResourceItemProps {
   onViewData?: (resourceName: string) => void;
 }
 
+const FAKER_LOCALES = [
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "vi", name: "Tiếng Việt", flag: "🇻🇳" },
+  { code: "ja", name: "日本語", flag: "🇯🇵" },
+  { code: "ko", name: "한국어", flag: "🇰🇷" },
+  { code: "zh_CN", name: "简体中文", flag: "🇨🇳" },
+  { code: "es", name: "Español", flag: "🇪🇸" },
+  { code: "fr", name: "Français", flag: "🇫🇷" },
+  { code: "de", name: "Deutsch", flag: "🇩🇪" },
+  { code: "it", name: "Italiano", flag: "🇮🇹" },
+  { code: "pt", name: "Português", flag: "🇵🇹" },
+  { code: "ru", name: "Русский", flag: "🇷🇺" },
+  { code: "pl", name: "Polski", flag: "🇵🇱" },
+  { code: "nl", name: "Nederlands", flag: "🇳🇱" },
+  { code: "tr", name: "Türkçe", flag: "🇹🇷" },
+  { code: "ar", name: "العربية", flag: "🇸🇦" },
+];
+
 export function ResourceItem({
   isCopied,
   projectId,
@@ -45,6 +66,7 @@ export function ResourceItem({
   const [localSliderValue, setLocalSliderValue] = useState<number | undefined>(
     resource.recordCount,
   );
+  const [selectedLocale, setSelectedLocale] = useState<string>("en");
   const resourceName = resource.name;
   const apiUrl = `${import.meta.env.VITE_API_BASE_MOCK_URL}/${projectId}/`;
   const recordCount = resource.recordCount || 0;
@@ -69,7 +91,7 @@ export function ResourceItem({
       const response = await recordsService.generateRecords(
         projectId,
         resourceName,
-        { count: maxGenerate },
+        { count: maxGenerate, locale: selectedLocale },
       );
 
       addToast({
@@ -193,7 +215,7 @@ export function ResourceItem({
         </div>
 
         {/* Records Slider */}
-        <div className="flex items-center gap-3 pt-2 border-t border-default-200">
+        <div className="border w-fit p-3 rounded-xl flex items-center gap-3 pt-2 border-t border-default-200">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-default-600">Data generation</span>
@@ -215,11 +237,39 @@ export function ResourceItem({
                 onChange={handleSliderChange}
                 onChangeEnd={handleSliderChangeEnd}
               />
-              <span className="text-xs text-default-600 min-w-[50px] text-right">
+              <span className="text-xs text-default-600 text-right">
                 {localSliderValue !== undefined
                   ? localSliderValue
                   : recordCount}
               </span>
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <Select
+                className="w-[160px]"
+                isDisabled={isGenerating}
+                selectedKeys={[selectedLocale]}
+                size="sm"
+                variant="bordered"
+                onSelectionChange={(keys) => {
+                  const locale = Array.from(keys)[0] as string;
+
+                  setSelectedLocale(locale);
+                }}
+              >
+                {FAKER_LOCALES.map((locale) => (
+                  <SelectItem key={locale.code} textValue={locale.name}>
+                    <div className="flex items-center gap-2">
+                      <span>{locale.flag}</span>
+                      <span>{locale.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </Select>
+              <Tooltip content="Language only applies when using fakerjs type">
+                <div className="flex items-center">
+                  <AlertCircle className="h-4 w-4 text-default-400 cursor-help" />
+                </div>
+              </Tooltip>
             </div>
           </div>
         </div>
