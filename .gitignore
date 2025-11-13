@@ -22,7 +22,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
-
+.env.*
+!.env.example
+!.env.template
 
 pnpm-lock.yaml
 yarn.lock
