@@ -14,6 +14,7 @@ interface AuthState {
 interface AuthActions {
   login: (email: string, password: string) => Promise<void>;
   googleLogin: (idToken: string) => Promise<void>;
+  githubLogin: (accessToken: string) => Promise<void>;
   register: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -85,6 +86,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   googleLogin: async (idToken: string) => {
     const response = await authService.googleLogin({ idToken });
+
+    apiClient.setTokens(response.accessToken, response.refreshToken);
+
+    set({
+      user: response.user,
+      isAuthenticated: true,
+      isLoading: false,
+    });
+  },
+
+  githubLogin: async (accessToken: string) => {
+    const response = await authService.githubLogin({ accessToken });
 
     apiClient.setTokens(response.accessToken, response.refreshToken);
 

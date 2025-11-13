@@ -1,5 +1,5 @@
 export type UserRole = "USER" | "ADMIN";
-export type Provider = "LOCAL" | "GOOGLE";
+export type Provider = "LOCAL" | "GOOGLE" | "GITHUB";
 
 export interface User {
   id: string;
@@ -42,6 +42,10 @@ export interface RefreshTokenResponse {
 
 export interface GoogleLoginRequest {
   idToken: string;
+}
+
+export interface GitHubLoginRequest {
+  accessToken: string;
 }
 
 export interface ChangePasswordRequest {

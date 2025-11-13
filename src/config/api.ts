@@ -12,6 +12,9 @@ export const STORAGE_KEYS = {
 // Google OAuth Config
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
+// GitHub OAuth Config
+export const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID || "";
+
 // Polar.sh Config
 export const POLAR_CONFIG = {
   organization: import.meta.env.VITE_POLAR_ORGANIZATION || "",

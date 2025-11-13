@@ -1,6 +1,7 @@
 import type {
   AuthResponse,
   ChangePasswordRequest,
+  GitHubLoginRequest,
   GoogleLoginRequest,
   LoginRequest,
   RegisterRequest,
@@ -33,6 +34,15 @@ class AuthService {
    */
   async googleLogin(data: GoogleLoginRequest): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>("/auth/google", data);
+
+    return response.data;
+  }
+
+  /**
+   * Login with GitHub OAuth
+   */
+  async githubLogin(data: GitHubLoginRequest): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>("/auth/github", data);
 
     return response.data;
   }
