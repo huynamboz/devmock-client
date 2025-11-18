@@ -11,6 +11,7 @@ import BlogPage from "./pages/blog";
 import AboutPage from "./pages/about";
 import ProjectsPage from "./pages/projects";
 import AdminUsersPage from "./pages/admin/users";
+import AdminResourcesPage from "./pages/admin/resources";
 
 import { PublicRoute } from "@/components/public-route";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -22,6 +23,7 @@ function App() {
       {/* Admin Routes - requires ADMIN role */}
       <Route element={<AdminRoute />}>
         <Route element={<AdminUsersPage />} path="/admin/users" />
+        <Route element={<AdminResourcesPage />} path="/admin/resources" />
       </Route>
 
       {/* Protected Layout - chỉ check auth 1 lần */}
