@@ -3,7 +3,6 @@ import {
   FileText,
   Folder,
   TrendingUp,
-  Loader2,
 } from "lucide-react";
 
 import { type ResourceStats } from "@/services/admin-resources.service";

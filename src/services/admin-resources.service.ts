@@ -2,7 +2,6 @@ import { apiClient } from "@/lib/api-client";
 import type {
   Resource,
   ResourceField,
-  ResourceWithSettings,
 } from "@/types/project";
 
 export interface GetAdminResourcesParams {

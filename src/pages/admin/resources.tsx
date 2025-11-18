@@ -31,7 +31,6 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/dropdown";
-import { Select, SelectItem } from "@heroui/select";
 import { addToast } from "@heroui/toast";
 import { useNavigate } from "react-router-dom";
 
@@ -72,22 +71,18 @@ export default function AdminResourcesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [projectFilter, setProjectFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [stats, setStats] = useState<ResourceStats | null>(null);
   const [isStatsLoading, setIsStatsLoading] = useState(true);
-  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>(
-    [],
-  );
   const limit = 10;
   const navigate = useNavigate();
 
   useEffect(() => {
     loadResources();
     loadStats();
-  }, [page, projectFilter]);
+  }, [page]);
 
   const loadResources = async () => {
     try {
@@ -98,7 +93,6 @@ export default function AdminResourcesPage() {
         page,
         limit,
         ...(searchQuery && { search: searchQuery }),
-        ...(projectFilter !== "all" && { projectId: projectFilter }),
       };
 
       const response = await adminResourcesService.getAll(params);
@@ -106,18 +100,10 @@ export default function AdminResourcesPage() {
       setResources(response.data || []);
       setTotal(response.meta?.total || 0);
       setTotalPages(response.meta?.totalPages || 1);
-
-      // Extract unique projects for filter dropdown
-      const uniqueProjects = Array.from(
-        new Map(
-          response.data
-            ?.filter((r) => r.project)
-            .map((r) => [r.project!.id, r.project!]) || [],
-        ).values(),
-      );
-      setProjects(uniqueProjects);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load resources.");
+      setError(
+        err instanceof Error ? err.message : "Failed to load resources.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -239,25 +225,6 @@ export default function AdminResourcesPage() {
           <Button color="primary" size="lg" onPress={handleSearch}>
             Search
           </Button>
-          <Select
-            className="w-full sm:w-64"
-            label="Project"
-            placeholder="All Projects"
-            selectedKeys={projectFilter !== "all" ? [projectFilter] : []}
-            size="lg"
-            variant="bordered"
-            onSelectionChange={(keys) => {
-              const selected = Array.from(keys)[0] as string;
-
-              setProjectFilter(selected || "all");
-              setPage(1);
-            }}
-          >
-            <SelectItem key="all">All Projects</SelectItem>
-            {projects.map((project) => (
-              <SelectItem key={project.id}>{project.name}</SelectItem>
-            ))}
-          </Select>
         </div>
 
         {/* Error Message */}
@@ -282,17 +249,16 @@ export default function AdminResourcesPage() {
             </div>
             <h2 className="text-2xl font-semibold mb-2">No resources found</h2>
             <p className="text-default-600 mb-6 max-w-md">
-              {searchQuery || projectFilter !== "all"
+              {searchQuery
                 ? "Try adjusting your filters to see more results."
                 : "No resources have been created yet."}
             </p>
-            {(searchQuery || projectFilter !== "all") && (
+            {searchQuery && (
               <Button
                 color="default"
                 variant="bordered"
                 onPress={() => {
                   setSearchQuery("");
-                  setProjectFilter("all");
                   setPage(1);
                 }}
               >
@@ -465,4 +431,3 @@ export default function AdminResourcesPage() {
     </DefaultLayout>
   );
 }
-
