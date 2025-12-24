@@ -28,7 +28,7 @@
     "@heroui/system": "2.4.23",
     "@heroui/table": "^2.2.27",
     "@heroui/tabs": "^2.2.24",
-    "@heroui/theme": "2.4.23",
+    "@heroui/theme": "^2.4.25",
     "@heroui/toast": "^2.0.17",
     "@heroui/use-theme": "2.1.10",
     "@monaco-editor/react": "^4.7.0",
@@ -53,7 +53,7 @@
     "react-router-dom": "6.23.0",
     "react-syntax-highlighter": "^16.1.0",
     "tailwind-merge": "^3.3.1",
-    "tailwind-variants": "3.1.1",
+    "tailwind-variants": "^3.2.2",
     "tailwindcss": "4.1.11",
     "tailwindcss-animate": "^1.0.7",
     "zustand": "^5.0.8"
