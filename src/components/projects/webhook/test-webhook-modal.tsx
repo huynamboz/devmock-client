@@ -1,4 +1,4 @@
-import type { Webhook, TestWebhookRequest } from "@/types/webhook";
+import type { Webhook } from "@/types/webhook";
 
 import { useState } from "react";
 import { Button } from "@heroui/button";
@@ -28,7 +28,9 @@ export function TestWebhookModal({
   onClose,
   onSuccess,
 }: TestWebhookModalProps) {
-  const [method, setMethod] = useState<"GET" | "POST" | "PUT" | "PATCH" | "DELETE">("POST");
+  const [method, setMethod] = useState<
+    "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+  >("POST");
   const [headers, setHeaders] = useState("");
   const [body, setBody] = useState("");
   const [queryParams, setQueryParams] = useState("");
@@ -50,9 +52,11 @@ export function TestWebhookModal({
 
       // Parse headers
       const headersObj: Record<string, string> = {};
+
       if (headers.trim()) {
         headers.split("\n").forEach((line) => {
           const [key, ...valueParts] = line.split(":");
+
           if (key && valueParts.length > 0) {
             headersObj[key.trim()] = valueParts.join(":").trim();
           }
@@ -61,9 +65,11 @@ export function TestWebhookModal({
 
       // Parse query params
       const queryParamsObj: Record<string, string> = {};
+
       if (queryParams.trim()) {
         queryParams.split("&").forEach((param) => {
           const [key, value] = param.split("=");
+
           if (key) {
             queryParamsObj[decodeURIComponent(key.trim())] = decodeURIComponent(
               (value || "").trim(),
@@ -75,6 +81,7 @@ export function TestWebhookModal({
       // Build URL
       const baseUrl = webhook.url;
       const url = new URL(baseUrl);
+
       Object.keys(queryParamsObj).forEach((key) => {
         url.searchParams.append(key, queryParamsObj[key]);
       });
@@ -118,6 +125,7 @@ export function TestWebhookModal({
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to send request.";
+
       setError(errorMessage);
       addToast({
         title: "Failed to send request",
@@ -177,6 +185,7 @@ export function TestWebhookModal({
                 variant="bordered"
                 onSelectionChange={(keys) => {
                   const m = Array.from(keys)[0] as string;
+
                   setMethod(m as typeof method);
                 }}
               >
@@ -188,47 +197,47 @@ export function TestWebhookModal({
               </Select>
               <div className="flex-1">
                 <Input
+                  isReadOnly
+                  description="This is your webhook URL"
                   label="Webhook URL"
+                  size="sm"
                   value={webhook.url}
                   variant="bordered"
-                  isReadOnly
-                  size="sm"
-                  description="This is your webhook URL"
                 />
               </div>
             </div>
 
             <Input
+              description="Optional query parameters (format: key=value&key2=value2)"
               label="Query Parameters"
               placeholder="key1=value1&key2=value2"
               size="sm"
               value={queryParams}
               variant="bordered"
               onChange={(e) => setQueryParams(e.target.value)}
-              description="Optional query parameters (format: key=value&key2=value2)"
             />
 
             <Textarea
+              description="One header per line (format: Key: Value)"
               label="Headers"
+              minRows={3}
               placeholder="Content-Type: application/json&#10;Authorization: Bearer token"
               size="sm"
               value={headers}
               variant="bordered"
               onChange={(e) => setHeaders(e.target.value)}
-              description="One header per line (format: Key: Value)"
-              minRows={3}
             />
 
             {method !== "GET" && (
               <Textarea
+                description="Request body (JSON or text)"
                 label="Body"
+                minRows={5}
                 placeholder='{"key": "value"}'
                 size="sm"
                 value={body}
                 variant="bordered"
                 onChange={(e) => setBody(e.target.value)}
-                description="Request body (JSON or text)"
-                minRows={5}
               />
             )}
 
@@ -276,4 +285,3 @@ export function TestWebhookModal({
     </Modal>
   );
 }
-

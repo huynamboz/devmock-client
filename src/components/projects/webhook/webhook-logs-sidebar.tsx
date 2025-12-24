@@ -1,7 +1,7 @@
 import type { WebhookLog } from "@/types/webhook";
 
 import { useEffect, useState } from "react";
-import { Loader2, RefreshCw, Trash2, Pause, Play } from "lucide-react";
+import { RefreshCw, Trash2, Pause, Play } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { ScrollShadow } from "@heroui/scroll-shadow";

@@ -1,6 +1,5 @@
 import type { Webhook } from "@/types/webhook";
 
-import { useState } from "react";
 import {
   Copy,
   Edit,
@@ -12,7 +11,6 @@ import {
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Tooltip } from "@heroui/tooltip";
-import { addToast } from "@heroui/toast";
 
 interface WebhookItemProps {
   webhook: Webhook;
@@ -36,6 +34,7 @@ export function WebhookItem({
   const handleItemClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on buttons
     const target = e.target as HTMLElement;
+
     if (
       target.closest("button") ||
       target.closest('[role="button"]') ||
@@ -49,9 +48,9 @@ export function WebhookItem({
   return (
     <div
       className="bg-content1 border border-primary/20 rounded-2xl p-4 hover:border-primary hover:shadow-sm transition-all duration-200 cursor-pointer"
-      onClick={handleItemClick}
       role="button"
       tabIndex={0}
+      onClick={handleItemClick}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           onViewLogs(webhook);
@@ -107,7 +106,8 @@ export function WebhookItem({
               </div>
               {webhook.lastActivityAt && (
                 <p className="text-xs text-default-400 mt-1">
-                  Last activity: {new Date(webhook.lastActivityAt).toLocaleString()}
+                  Last activity:{" "}
+                  {new Date(webhook.lastActivityAt).toLocaleString()}
                 </p>
               )}
             </div>
@@ -165,4 +165,3 @@ export function WebhookItem({
     </div>
   );
 }
-

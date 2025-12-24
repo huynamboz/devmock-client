@@ -5,9 +5,9 @@ import {
   Copy,
   Database,
   FileJson,
-  Loader2,
   RefreshCw,
   Table as TableIcon,
+  Loader,
 } from "lucide-react";
 import { JsonEditor } from "json-edit-react";
 import { Button } from "@heroui/button";
@@ -29,7 +29,6 @@ import {
   TableCell,
 } from "@heroui/table";
 import { Select, SelectItem } from "@heroui/select";
-import { Input } from "@heroui/input";
 
 import { webhooksService } from "@/services/webhooks.service";
 
@@ -49,7 +48,7 @@ export function WebhookLogsModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [limit] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [methodFilter, setMethodFilter] = useState<string>("all");
@@ -95,18 +94,6 @@ export function WebhookLogsModal({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const formatValue = (value: unknown): string => {
-    if (value === null || value === undefined) {
-      return "";
-    }
-
-    if (typeof value === "object") {
-      return JSON.stringify(value, null, 2);
-    }
-
-    return String(value);
   };
 
   const copyToClipboard = async (text: string) => {
@@ -159,6 +146,7 @@ export function WebhookLogsModal({
               variant="bordered"
               onSelectionChange={(keys) => {
                 const method = Array.from(keys)[0] as string;
+
                 setMethodFilter(method);
                 setPage(1);
               }}
@@ -184,8 +172,8 @@ export function WebhookLogsModal({
 
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="mt-4 text-default-600">Loading logs...</p>
+              <Loader className="h-8 w-8 animate-spin text-primary" />
+              {/* <p className="mt-4 text-default-600">Loading logs...</p> */}
             </div>
           ) : error ? (
             <div className="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
@@ -224,13 +212,14 @@ export function WebhookLogsModal({
                     classNames={{
                       wrapper: "min-h-[222px]",
                     }}
-                    selectionMode="single"
                     selectedKeys={
                       selectedLog ? new Set([selectedLog.id]) : new Set()
                     }
+                    selectionMode="single"
                     onSelectionChange={(keys) => {
                       const selectedId = Array.from(keys)[0] as string;
                       const log = logs.find((l) => l.id === selectedId);
+
                       setSelectedLog(log || null);
                     }}
                   >
@@ -267,7 +256,8 @@ export function WebhookLogsModal({
                               className={`px-2 py-1 rounded text-xs font-semibold ${
                                 log.statusCode >= 200 && log.statusCode < 300
                                   ? "bg-green-100 text-green-700"
-                                  : log.statusCode >= 300 && log.statusCode < 400
+                                  : log.statusCode >= 300 &&
+                                      log.statusCode < 400
                                     ? "bg-yellow-100 text-yellow-700"
                                     : "bg-red-100 text-red-700"
                               }`}
@@ -376,4 +366,3 @@ export function WebhookLogsModal({
     </Modal>
   );
 }
-
