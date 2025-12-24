@@ -23,6 +23,9 @@
 }
 
 @layer components {
+    button {
+      @apply cursor-pointer;
+    }
     .background-grid {
       @apply bg-transparent bg-gradient-to-b from-slate-100 dark:from-slate-900 relative z-0
     }

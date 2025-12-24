@@ -13,6 +13,10 @@ export const siteConfig = {
       label: "Projects",
       href: "/projects",
     },
+    {
+      label: "Webhooks",
+      href: "/webhooks",
+    },
   ],
   navMenuItems: [
     {

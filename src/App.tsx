@@ -10,6 +10,8 @@ import PricingPage from "./pages/pricing";
 import BlogPage from "./pages/blog";
 import AboutPage from "./pages/about";
 import ProjectsPage from "./pages/projects";
+import WebhooksPage from "./pages/webhooks";
+import WebhookDetailPage from "./pages/webhook-detail";
 import AdminUsersPage from "./pages/admin/users";
 import AdminResourcesPage from "./pages/admin/resources";
 
@@ -33,6 +35,8 @@ function App() {
         <Route element={<AboutPage />} path="/about" />
         <Route element={<ProjectsPage />} path="/projects" />
         <Route element={<ProjectDetailPage />} path="/projects/:id" />
+        <Route element={<WebhooksPage />} path="/webhooks" />
+        <Route element={<WebhookDetailPage />} path="/webhooks/:id" />
       </Route>
 
       {/* Public Layout */}

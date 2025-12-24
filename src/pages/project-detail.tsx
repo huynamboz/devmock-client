@@ -204,25 +204,27 @@ export default function ProjectDetailPage() {
           </div>
 
           {/* Resources Section */}
-          <ResourcesSection
-            project={project}
-            onCreateResource={onCreateResourceOpen}
-            onDelete={(resourceId, resourceName) => {
-              setDeletingResource({ id: resourceId, name: resourceName });
-              onDeleteResourceOpen();
-            }}
-            onEdit={(resourceId) => {
-              setEditingResourceId(resourceId);
-              onEditResourceOpen();
-            }}
-            onGenerateSuccess={() => {
-              // Optional: Refresh project if needed after generating records
-              // loadProject();
-            }}
-            // onViewData={(resourceName) => {
-            //   // TODO: Implement view data functionality
-            // }}
-          />
+          <div className="mt-8">
+            <ResourcesSection
+              project={project}
+              onCreateResource={onCreateResourceOpen}
+              onDelete={(resourceId, resourceName) => {
+                setDeletingResource({ id: resourceId, name: resourceName });
+                onDeleteResourceOpen();
+              }}
+              onEdit={(resourceId) => {
+                setEditingResourceId(resourceId);
+                onEditResourceOpen();
+              }}
+              onGenerateSuccess={() => {
+                // Optional: Refresh project if needed after generating records
+                // loadProject();
+              }}
+              // onViewData={(resourceName) => {
+              //   // TODO: Implement view data functionality
+              // }}
+            />
+          </div>
 
           {/* Create Resource Modal */}
           <CreateResourceModal
