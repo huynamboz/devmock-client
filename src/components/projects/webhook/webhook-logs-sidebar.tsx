@@ -255,18 +255,16 @@ export function WebhookLogsSidebar({
         ) : (
           <div className="p-2">
             {logs.map((log) => (
-              <div
+              <button
                 key={log.id}
                 className={`cursor-pointer group relative w-full p-3 border rounded-lg mb-2 transition-all ${
                   selectedLogId === log.id
                     ? "bg-primary/10 border-1 border-primary"
                     : "bg-default-50 border border-default-200 hover:border-primary/50"
                 }`}
+                onClick={() => onSelectLog(log)}
               >
-                <button
-                  className="w-full text-left cursor-pointer"
-                  onClick={() => onSelectLog(log)}
-                >
+                <div className="w-full text-left cursor-pointer">
                   <div className="flex items-center justify-between mb-2">
                     <span
                       className={`px-2 py-0.5 rounded text-xs font-semibold ${getMethodColor(
@@ -287,7 +285,7 @@ export function WebhookLogsSidebar({
                     <span>•</span>
                     <span>{log.processingTimeMs}ms</span>
                   </div>
-                </button>
+                </div>
                 <Tooltip content="Delete log">
                   <Button
                     isIconOnly
@@ -303,7 +301,7 @@ export function WebhookLogsSidebar({
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </Tooltip>
-              </div>
+              </button>
             ))}
             {hasMore && (
               <div className="p-2">
