@@ -18,6 +18,7 @@ import {
 import { DeleteLogsModal } from "./delete-logs-modal";
 
 import { webhooksService } from "@/services/webhooks.service";
+import { formatDateTime } from "@/lib/utils";
 
 interface WebhookLogDetailProps {
   log: WebhookLog;
@@ -149,7 +150,7 @@ export function WebhookLogDetail({
           <div>
             <span className="text-default-500">Time: </span>
             <span className="font-medium">
-              {new Date(log.createdAt).toLocaleString()}
+              {formatDateTime(log.createdAt)}
             </span>
           </div>
           <div>

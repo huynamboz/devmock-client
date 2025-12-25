@@ -11,6 +11,7 @@ import { Tooltip } from "@heroui/tooltip";
 import { DeleteLogsModal } from "./delete-logs-modal";
 
 import { webhooksService } from "@/services/webhooks.service";
+import { formatDateTimeCompact } from "@/lib/utils";
 
 interface WebhookLogsSidebarProps {
   webhookId: string;
@@ -274,7 +275,7 @@ export function WebhookLogsSidebar({
                       {log.method}
                     </span>
                     <span className="text-xs text-default-500">
-                      {new Date(log.createdAt).toLocaleTimeString()}
+                      {formatDateTimeCompact(log.createdAt)}
                     </span>
                   </div>
                   <div className="text-xs text-default-600 font-mono truncate">
