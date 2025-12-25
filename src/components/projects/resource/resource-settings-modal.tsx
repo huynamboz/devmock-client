@@ -132,7 +132,7 @@ export function ResourceSettingsModal({
   };
 
   const getMethodUrl = (method: HttpMethod): string => {
-    const baseUrl = import.meta.env.VITE_API_BASE_MOCK_URL || "";
+    const baseUrl = `${import.meta.env.VITE_API_BASE_MOCK_URL}/pilot/`;
     const pid = projectId || loadedProjectId;
     const rn = resourceName;
 

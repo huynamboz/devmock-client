@@ -68,7 +68,7 @@ export function ResourceItem({
   );
   const [selectedLocale, setSelectedLocale] = useState<string>("en");
   const resourceName = resource.name;
-  const apiUrl = `${import.meta.env.VITE_API_BASE_MOCK_URL}/${projectId}/`;
+  const apiUrl = `${import.meta.env.VITE_API_BASE_MOCK_URL}/pilot/${projectId}/`;
   const recordCount = resource.recordCount || 0;
 
   const handleGenerateRecords = async (count: number) => {

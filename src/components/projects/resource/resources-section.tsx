@@ -56,7 +56,7 @@ export function ResourcesSection({
       return;
     }
 
-    const apiUrl = `${import.meta.env.VITE_API_BASE_MOCK_URL}/${project.id}/${resourceName}`;
+    const apiUrl = `${import.meta.env.VITE_API_BASE_MOCK_URL}/pilot/${project.id}/${resourceName}`;
 
     try {
       await navigator.clipboard.writeText(apiUrl);
