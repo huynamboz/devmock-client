@@ -5,10 +5,10 @@ export const siteConfig = {
   description:
     "A lightweight mock backend + mock database built for Frontend Developers. Create data models, generate mock data, and call real REST APIs instantly while focusing entirely on UI development.",
   navItems: [
-    {
-      label: "Pricing",
-      href: "/pricing",
-    },
+    // {
+    //   label: "Pricing",
+    //   href: "/pricing",
+    // },
     {
       label: "Projects",
       href: "/projects",
