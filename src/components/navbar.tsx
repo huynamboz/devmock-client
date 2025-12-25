@@ -15,7 +15,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDisclosure } from "@heroui/modal";
 
 import { siteConfig } from "@/config/site";
@@ -25,6 +25,7 @@ import { ChangePasswordModal } from "@/components/change-password-modal";
 
 export const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const logout = useAuthStore((state) => state.logout);
@@ -85,20 +86,30 @@ export const Navbar = () => {
           </Link>
         </NavbarBrand>
         <div className="hidden lg:flex gap-4 xl:gap-6 justify-start ml-2">
-          {siteConfig.navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <Link
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium text-sm",
-                )}
-                color="foreground"
-                href={item.href}
-              >
-                {item.label}
-              </Link>
-            </NavbarItem>
-          ))}
+          {siteConfig.navItems.map((item) => {
+            const isActive =
+              location.pathname === item.href ||
+              (item.href !== "/" &&
+                location.pathname.startsWith(item.href));
+
+            return (
+              <NavbarItem key={item.href}>
+                <Link
+                  className={clsx(
+                    linkStyles({ color: "foreground" }),
+                    "text-sm transition-colors",
+                    isActive
+                      ? "text-primary font-medium"
+                      : "text-default-600 hover:text-foreground",
+                  )}
+                  color="foreground"
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              </NavbarItem>
+            );
+          })}
         </div>
       </NavbarContent>
 
@@ -335,23 +346,33 @@ export const Navbar = () => {
           </>
         )}
         <div className="mx-4 mt-2 flex flex-col gap-2">
-          {siteConfig.navMenuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
-              <Link
-                color={
-                  index === 2
-                    ? "primary"
-                    : index === siteConfig.navMenuItems.length - 1
+          {siteConfig.navMenuItems.map((item, index) => {
+            const isActive =
+              location.pathname === item.href ||
+              (item.href !== "/" &&
+                location.pathname.startsWith(item.href));
+
+            return (
+              <NavbarMenuItem key={`${item}-${index}`}>
+                <Link
+                  className={clsx(
+                    isActive && "text-primary font-medium",
+                  )}
+                  color={
+                    index === siteConfig.navMenuItems.length - 1
                       ? "danger"
-                      : "foreground"
-                }
-                href="#"
-                size="lg"
-              >
-                {item.label}
-              </Link>
-            </NavbarMenuItem>
-          ))}
+                      : isActive
+                        ? "primary"
+                        : "foreground"
+                  }
+                  href={item.href}
+                  size="lg"
+                >
+                  {item.label}
+                </Link>
+              </NavbarMenuItem>
+            );
+          })}
         </div>
       </NavbarMenu>
     </HeroUINavbar>
