@@ -37,50 +37,48 @@ Create data models, generate mock data, and call real REST APIs instantly while 
 
 ## 🧱 Backend Roadmap (Detailed)
 
-| Area                     | Task                                                      | Status              | Notes                                           |
-| ------------------------ | --------------------------------------------------------- | ------------------- | ----------------------------------------------- |
-| **Auth / Users**         | JWT authentication                                        | ✅ Done             | Core login / identity functional                |
-|                          | Authorization per project/resource                        | ✅ Done             | Owner-based access enforced                     |
-| **Projects**             | Create / List / Delete projects                           | ✅ Done             | Workspaces structured                           |
-|                          | Project metadata (stats, updatedAt)                       | 🔜                  | Optional for dashboard summary                  |
-| **Resources**            | Create / List / Delete resources                          | ✅ Done             | Logical data tables                             |
-|                          | Get Resource detail (for schema UI)                       | ✅ Done             | Returned with fields included                   |
-|                          | Rename resource                                           | 🔜                  | Improves DX and data clarity                    |
-| **Fields (Schema)**      | Add / Edit / Delete fields                                | ✅ Done             | Field-level schema control                      |
-|                          | Support `fakerType` when type = `faker`                   | ✅ Done             | Enables controlled fake data                    |
-|                          | JSON Template mode support (backend storage)              | ✅ Done             | `resource.mode` + `resource.jsonTemplate` added |
-|                          | Validate template syntax on save                          | 🔜                  | Avoid invalid generation errors                 |
-| **Records (Data Layer)** | Store record as JSONB (`Record.data`)                     | ✅ Data model ready | Model supports any structure                    |
-|                          | CRUD API for records                                      | 🔜 Next priority    | `/records` service + validation rules           |
-|                          | Pagination + sorting                                      | 🔜                  | Prevent performance issues on large sets        |
-|                          | Validation against schema/JSON Template                   | 🔜                  | Ensures consistent dataset shape                |
-| **Mock Data Generation** | Faker-based generation service                            | 🟡 In progress      | Used when mode = `schema`                       |
-|                          | Recursive generator for JSON Template                     | 🔜                  | Supports nested objects / arrays                |
-|                          | Background/bulk generation job                            | 🔜                  | Needed for large `count` values                 |
-| **Public REST API**      | Dynamic CRUD endpoint → `/api/:project/:resource`         | 🔜                  | Core feature for FE integration                 |
-|                          | Dynamic CRUD detail → `/api/:project/:resource/:recordId` | 🔜                  | For item-level view/edit                        |
-|                          | Error responses + validation contracts                    | 🔜                  | Ensure consistent DX for frontend devs          |
-| **API Access Control**   | API Keys (generate, revoke, list)                         | 🔜                  | Allows calling API without JWT                  |
-|                          | Token-based access to dynamic API                         | 🔜                  | Required for embedding into frontend apps       |
-|                          | Rate limit per plan (Free vs Pro)                         | 🔜                  | backend-level enforcement (likely Upstash)      |
-| **Export / Integration** | Export resource schema → Supabase SQL                     | ⭐ Planned          | Converts our metadata → Postgres tables         |
-|                          | Export records → Supabase INSERT batches                  | ⭐ Planned          | Moves mock → real data without rewriting FE     |
-| **Performance / Infra**  | Index `Record.resourceId`                                 | ✅ Done             | Enables fast record filtering                   |
-|                          | Query optimization (limit, projection)                    | ✅ Policy ready     | Default pagination avoids large payloads        |
-|                          | Optional Redis cache for GET list                         | 🔜                  | Only needed >2k users or heavy load             |
-| **Quality / Tooling**    | DTO validation (class-validator)                          | ✅                  | Framework-level input validation                |
-|                          | Consistent error handling (global filter)                 | ✅                  | Proper structured errors                        |
-|                          | Logging & request tracing                                 | 🔜                  | Helps debugging dynamic API behavior            |
+| Area                     | Task                                                      | Status          | Notes                                           |
+| ------------------------ | --------------------------------------------------------- | --------------- | ----------------------------------------------- |
+| **Auth / Users**         | JWT authentication                                        | ✅ Done         | Core login / identity functional                |
+|                          | Authorization per project/resource                        | ✅ Done         | Owner-based access enforced                     |
+| **Projects**             | Create / List / Delete projects                           | ✅ Done         | Workspaces structured                           |
+|                          | Project metadata (stats, updatedAt)                       | 🔜              | Optional for dashboard summary                  |
+| **Resources**            | Create / List / Delete resources                          | ✅ Done         | Logical data tables                             |
+|                          | Get Resource detail (for schema UI)                       | ✅ Done         | Returned with fields included                   |
+|                          | Rename resource                                           | 🔜              | Improves DX and data clarity                    |
+| **Fields (Schema)**      | Add / Edit / Delete fields                                | ✅ Done         | Field-level schema control                      |
+|                          | Support `fakerType` when type = `faker`                   | ✅ Done         | Enables controlled fake data                    |
+|                          | JSON Template mode support (backend storage)              | ✅ Done         | `resource.mode` + `resource.jsonTemplate` added |
+|                          | Validate template syntax on save                          | 🔜              | Avoid invalid generation errors                 |
+| **Records (Data Layer)** | Store record as JSONB (`Record.data`)                     | ✅ Done         | Model supports any structure                    |
+|                          | CRUD API for records                                      | ✅ Done         | `/records` service + validation rules           |
+|                          | Pagination + sorting                                      | 🔜              | Prevent performance issues on large sets        |
+|                          | Validation against schema/JSON Template                   | 🔜              | Ensures consistent dataset shape                |
+| **Mock Data Generation** | Faker-based generation service                            | ✅ Done         | Used when mode = `schema`                       |
+|                          | Recursive generator for JSON Template                     | 🔜              | Supports nested objects / arrays                |
+|                          | Background/bulk generation job                            | 🔜              | Needed for large `count` values                 |
+| **Public REST API**      | Dynamic CRUD endpoint → `/api/:project/:resource`         | ✅ Done         | Core feature for FE integration                 |
+|                          | Dynamic CRUD detail → `/api/:project/:resource/:recordId` | ✅ Done         | For item-level view/edit                        |
+|                          | Error responses + validation contracts                    | 🔜              | Ensure consistent DX for frontend devs          |
+| **API Access Control**   | API Keys (generate, revoke, list)                         | 🔜              | Allows calling API without JWT                  |
+|                          | Token-based access to dynamic API                         | 🔜              | Required for embedding into frontend apps       |
+|                          | Rate limit per plan (Free vs Pro)                         | 🔜              | backend-level enforcement (likely Upstash)      |
+| **Export / Integration** | Export resource schema → Supabase SQL                     | ⭐ Planned      | Converts our metadata → Postgres tables         |
+|                          | Export records → Supabase INSERT batches                  | ⭐ Planned      | Moves mock → real data without rewriting FE     |
+| **Performance / Infra**  | Index `Record.resourceId`                                 | ✅ Done         | Enables fast record filtering                   |
+|                          | Query optimization (limit, projection)                    | ✅ Policy ready | Default pagination avoids large payloads        |
+|                          | Optional Redis cache for GET list                         | 🔜              | Only needed >2k users or heavy load             |
+| **Quality / Tooling**    | DTO validation (class-validator)                          | ✅              | Framework-level input validation                |
+|                          | Consistent error handling (global filter)                 | ✅              | Proper structured errors                        |
+|                          | Logging & request tracing                                 | 🔜              | Helps debugging dynamic API behavior            |
 
 ## 🔜 Next Steps (In Progress)
 
-- **Records CRUD** — Store and query JSONB data
-- **Dynamic REST API** → `/api/:projectId/:resourceName/...`
-- **Fake Data Generator**
-  - Preview on front-end
-  - Persist generated records on backend
-- **API Keys** for external frontend access
-- **Request Rate Limits** (Free vs Pro tiers)
+- **Webhooks Integration** — Enhanced log filtering and test payloads
+- **Export resource schema** → Supabase SQL
+- **AI-Assisted Data Generation**
+- **API Keys** for secured external access
+- **Pagination & Sorting** for large datasets
 
 ## 🌱 Future Enhancements
 
@@ -149,9 +147,10 @@ The application will be available at `http://localhost:5173`.
 
 ## 🚀 Status
 
-The project backend foundation is complete and stable.  
-We are currently implementing **record storage and dynamic API access**.
+The project foundation is complete and stable. Dashboard features including **Project Management**, **Resource Schema Definition**, **Mock Data Generation**, and **Records Management** are fully functional.
 
-Frontend dashboard development is in progress.
+**Webhooks** support is also live, allowing you to capture and inspect incoming requests.
+
+We are currently focusing on **Schema Export** and **Advanced Data Generation** features.
 
 Stay tuned ✨
