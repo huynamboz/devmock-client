@@ -47,8 +47,7 @@ const PROVIDERS = [
     key: "google",
     name: "Google Gemini",
     baseUrl: "https://generativelanguage.googleapis.com/v1",
-    color:
-      "text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/40",
+    color: "text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/40",
   },
   {
     key: "anthropic",
@@ -68,8 +67,7 @@ const PROVIDERS = [
     key: "together",
     name: "Together AI",
     baseUrl: "https://api.together.xyz/v1",
-    color:
-      "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/40",
+    color: "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/40",
   },
   {
     key: "custom",
@@ -452,9 +450,7 @@ export default function AdminSettingsPage() {
                       API Key
                     </span>
                     <code className="flex-1 text-xs text-foreground">
-                      {isVisible
-                        ? p.value.apiKey
-                        : maskApiKey(p.value.apiKey)}
+                      {isVisible ? p.value.apiKey : maskApiKey(p.value.apiKey)}
                     </code>
                     <Button
                       isIconOnly
@@ -617,9 +613,7 @@ export default function AdminSettingsPage() {
             />
             <div className="flex items-center justify-between rounded-lg bg-default-50 px-3 py-2 dark:bg-default-100/50">
               <div>
-                <span className="text-sm text-foreground">
-                  Set as default
-                </span>
+                <span className="text-sm text-foreground">Set as default</span>
                 <p className="text-xs text-default-400">
                   Used for all AI features by default
                 </p>

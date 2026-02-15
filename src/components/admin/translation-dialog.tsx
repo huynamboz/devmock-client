@@ -155,7 +155,11 @@ export function TranslationDialog({
         prev.map((t) => (t.id === updated.id ? updated : t)),
       );
       setEditingLang(null);
-      addToast({ title: "Translation updated", color: "success", variant: "flat" });
+      addToast({
+        title: "Translation updated",
+        color: "success",
+        variant: "flat",
+      });
     } catch (err) {
       addToast({
         title: "Failed to update",
@@ -182,7 +186,11 @@ export function TranslationDialog({
 
       setTranslations((prev) => [...prev, created]);
       setAddingLang(null);
-      addToast({ title: "Translation added", color: "success", variant: "flat" });
+      addToast({
+        title: "Translation added",
+        color: "success",
+        variant: "flat",
+      });
     } catch (err) {
       addToast({
         title: "Failed to add",
@@ -199,7 +207,11 @@ export function TranslationDialog({
     try {
       await translationService.deleteTranslation(t.id);
       setTranslations((prev) => prev.filter((tr) => tr.id !== t.id));
-      addToast({ title: "Translation deleted", color: "success", variant: "flat" });
+      addToast({
+        title: "Translation deleted",
+        color: "success",
+        variant: "flat",
+      });
     } catch (err) {
       addToast({
         title: "Failed to delete",
@@ -234,9 +246,7 @@ export function TranslationDialog({
       const template = promptSetting.value.prompt;
 
       // Build prompt: replace {languages} and {originalText}
-      const languageNames = missingLangs
-        .map((l) => `"${l.name}"`)
-        .join(",");
+      const languageNames = missingLangs.map((l) => `"${l.name}"`).join(",");
       const prompt = template
         .replace("{languages}", languageNames)
         .replace("{originalText}", text);
@@ -296,7 +306,11 @@ export function TranslationDialog({
 
         return rest;
       });
-      addToast({ title: "Translation saved", color: "success", variant: "flat" });
+      addToast({
+        title: "Translation saved",
+        color: "success",
+        variant: "flat",
+      });
     } catch (err) {
       addToast({
         title: "Failed to save",
@@ -444,11 +458,8 @@ export function TranslationDialog({
                       {isEditing && (
                         <div className="mt-1.5 flex items-end gap-1.5 pl-7">
                           <InputComponent
-                            autoFocus
                             className="flex-1"
-                            {...(multiline
-                              ? { maxRows: 3, minRows: 1 }
-                              : {})}
+                            {...(multiline ? { maxRows: 3, minRows: 1 } : {})}
                             placeholder="Translation..."
                             size="sm"
                             value={editValue}
@@ -490,21 +501,19 @@ export function TranslationDialog({
                             </p>
                             <div className="mt-1 flex items-center gap-1">
                               <Button
-                                size="sm"
                                 color="primary"
-                                variant="flat"
                                 isLoading={isSaving}
-                                startContent={
-                                  <Check className="h-3 w-3" />
-                                }
+                                size="sm"
+                                startContent={<Check className="h-3 w-3" />}
+                                variant="flat"
                                 onPress={() => handleSavePending(row.code)}
                               >
                                 Save
                               </Button>
                               <Button
                                 size="sm"
-                                variant="flat"
                                 startContent={<X className="h-3 w-3" />}
+                                variant="flat"
                                 onPress={() => handleDiscardPending(row.code)}
                               >
                                 Discard
@@ -533,11 +542,8 @@ export function TranslationDialog({
                       {isAdding && (
                         <div className="mt-1.5 flex items-end gap-1.5 pl-7">
                           <InputComponent
-                            autoFocus
                             className="flex-1"
-                            {...(multiline
-                              ? { maxRows: 3, minRows: 1 }
-                              : {})}
+                            {...(multiline ? { maxRows: 3, minRows: 1 } : {})}
                             placeholder="Translation..."
                             size="sm"
                             value={addValue}
@@ -583,9 +589,7 @@ export function TranslationDialog({
               isLoading={isGenerating}
               size="sm"
               startContent={
-                !isGenerating ? (
-                  <Sparkles className="h-3.5 w-3.5" />
-                ) : undefined
+                !isGenerating ? <Sparkles className="h-3.5 w-3.5" /> : undefined
               }
               variant="flat"
               onPress={handleGenerate}

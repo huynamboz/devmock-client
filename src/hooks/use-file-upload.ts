@@ -46,8 +46,7 @@ export function useFileUpload(options?: UseFileUploadOptions) {
 
         return data;
       } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : "Upload failed";
+        const msg = err instanceof Error ? err.message : "Upload failed";
 
         setError(msg);
         options?.onError?.(msg);

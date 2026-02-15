@@ -118,14 +118,21 @@ const DivGrid = ({
               clickedCell && "animate-cell-ripple [animation-fill-mode:none]",
               !interactive && "pointer-events-none",
             )}
+            role="button"
             style={{
               backgroundColor: fillColor,
               borderColor: borderColor,
               ...style,
             }}
+            tabIndex={0}
             onClick={
               interactive ? () => onCellClick?.(rowIdx, colIdx) : undefined
             }
+            onKeyDown={(e) => {
+              if (interactive && e.key === "Enter") {
+                onCellClick?.(rowIdx, colIdx);
+              }
+            }}
           />
         );
       })}

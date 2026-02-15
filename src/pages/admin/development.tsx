@@ -13,6 +13,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
+
 import { apiClient } from "@/lib/api-client";
 import { API_CONFIG } from "@/config/api";
 
@@ -31,7 +32,8 @@ const METHOD_COLORS: Record<HttpMethod, string> = {
   GET: "text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40",
   POST: "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/40",
   PUT: "text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/40",
-  PATCH: "text-violet-600 bg-violet-50 dark:text-violet-400 dark:bg-violet-950/40",
+  PATCH:
+    "text-violet-600 bg-violet-50 dark:text-violet-400 dark:bg-violet-950/40",
   DELETE: "text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/40",
 };
 
@@ -378,10 +380,10 @@ export default function AdminDevelopmentPage() {
                 size="sm"
                 value={endpoint}
                 variant="bordered"
-                onValueChange={setEndpoint}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !isLoading) handleSend();
                 }}
+                onValueChange={setEndpoint}
               />
               <Button
                 className="shrink-0 font-medium"

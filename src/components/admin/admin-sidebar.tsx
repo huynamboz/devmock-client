@@ -47,10 +47,7 @@ export function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
       >
         {/* Logo */}
         <div className="flex h-16 shrink-0 items-center justify-between px-5">
-          <NavLink
-            className="flex items-center gap-2.5"
-            to="/admin"
-          >
+          <NavLink className="flex items-center gap-2.5" to="/admin">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
               <span className="text-sm font-bold text-white">V</span>
             </div>

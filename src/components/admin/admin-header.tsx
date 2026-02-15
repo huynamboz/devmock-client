@@ -40,7 +40,8 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
           <Input
             classNames={{
               base: "h-9",
-              inputWrapper: "h-9 bg-default-100 dark:bg-default-50 border border-default-200 shadow-none",
+              inputWrapper:
+                "h-9 bg-default-100 dark:bg-default-50 border border-default-200 shadow-none",
               input: "text-sm",
             }}
             placeholder="Search"

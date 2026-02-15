@@ -369,7 +369,7 @@ export default function AdminSpeakingLessonDetailPage() {
                 translationField === "title"
                   ? lesson.title
                   : translationField === "description"
-                    ? lesson.description ?? ""
+                    ? (lesson.description ?? "")
                     : ""
               }
               onClose={() => setTranslationField(null)}
