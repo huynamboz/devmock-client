@@ -129,12 +129,7 @@ export function ChangePasswordModal({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      placement="center"
-      size="md"
-      onClose={handleClose}
-    >
+    <Modal isOpen={isOpen} placement="center" size="md" onClose={handleClose}>
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
@@ -247,11 +242,7 @@ export function ChangePasswordModal({
             >
               Cancel
             </Button>
-            <Button
-              color="primary"
-              isLoading={isLoading}
-              type="submit"
-            >
+            <Button color="primary" isLoading={isLoading} type="submit">
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -267,4 +258,3 @@ export function ChangePasswordModal({
     </Modal>
   );
 }
-

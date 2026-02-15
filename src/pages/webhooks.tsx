@@ -1,3 +1,5 @@
+import type { Webhook } from "@/types/webhook";
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Plus, Webhook as WebhookIcon } from "lucide-react";
@@ -7,7 +9,6 @@ import { addToast } from "@heroui/toast";
 import DefaultLayout from "@/layouts/default";
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import { webhooksService } from "@/services/webhooks.service";
-import type { Webhook } from "@/types/webhook";
 import { CreateWebhookModal } from "@/components/projects/webhook/create-webhook-modal";
 import { WebhookItem } from "@/components/projects/webhook/webhook-item";
 import { EditWebhookModal } from "@/components/projects/webhook/edit-webhook-modal";
@@ -36,6 +37,7 @@ export default function WebhooksPage() {
       setError("");
 
       const data = await webhooksService.getAll();
+
       setWebhooks(data);
     } catch (err) {
       setError(
@@ -67,6 +69,7 @@ export default function WebhooksPage() {
 
   const handleCopy = async (webhookId: string) => {
     const webhook = webhooks.find((w) => w.id === webhookId);
+
     if (!webhook) return;
 
     try {
@@ -168,13 +171,13 @@ export default function WebhooksPage() {
                 {webhooks.map((webhook) => (
                   <WebhookItem
                     key={webhook.id}
-                    webhook={webhook}
                     isCopied={copiedWebhookId === webhook.id}
+                    webhook={webhook}
                     onCopy={handleCopy}
-                    onEdit={handleEdit}
                     onDelete={handleDelete}
-                    onViewLogs={handleViewLogs}
+                    onEdit={handleEdit}
                     onTest={handleTest}
+                    onViewLogs={handleViewLogs}
                   />
                 ))}
               </div>

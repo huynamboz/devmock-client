@@ -270,7 +270,9 @@ export function DemoSection() {
                 <div className="p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-default-200 bg-default-50/50">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4">
                     <div>
-                      <h3 className="text-base sm:text-lg font-semibold">Schema Fields</h3>
+                      <h3 className="text-base sm:text-lg font-semibold">
+                        Schema Fields
+                      </h3>
                       <p className="text-xs sm:text-sm text-default-600">
                         Define the properties for your resource
                       </p>
@@ -441,7 +443,9 @@ export function DemoSection() {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
                     <div className="flex items-center gap-2">
                       <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-                      <h3 className="text-base sm:text-lg font-semibold">Generated Data</h3>
+                      <h3 className="text-base sm:text-lg font-semibold">
+                        Generated Data
+                      </h3>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button

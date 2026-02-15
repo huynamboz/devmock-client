@@ -81,7 +81,9 @@ export function HowItWorksSection() {
           initial="hidden"
           variants={headerVariants}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">How It Works</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
+            How It Works
+          </h2>
           <p className="text-base sm:text-lg text-default-600 max-w-2xl mx-auto px-4">
             Get started in minutes. No complex setup, no backend knowledge
             required.
@@ -111,7 +113,9 @@ export function HowItWorksSection() {
                   {step.number}
                 </motion.div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base sm:text-lg font-semibold">{step.title}</h3>
+                  <h3 className="text-base sm:text-lg font-semibold">
+                    {step.title}
+                  </h3>
                 </div>
               </div>
               <p className="text-xs sm:text-sm text-default-600 leading-relaxed flex-1">

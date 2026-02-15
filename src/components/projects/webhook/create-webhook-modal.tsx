@@ -35,16 +35,19 @@ export function CreateWebhookModal({
   const handleCreate = async () => {
     if (!name.trim()) {
       setError("Webhook name is required");
+
       return;
     }
 
     if (name.length > 100) {
       setError("Webhook name must be 100 characters or less");
+
       return;
     }
 
     if (description.length > 500) {
       setError("Description must be 500 characters or less");
+
       return;
     }
 
@@ -103,7 +106,9 @@ export function CreateWebhookModal({
             </div>
           )}
           <Input
+            description={`${name.length}/100 characters`}
             label="Webhook Name"
+            maxLength={100}
             placeholder="e.g., Payment Webhook, User Events"
             size="lg"
             value={name}
@@ -117,11 +122,12 @@ export function CreateWebhookModal({
                 handleCreate();
               }
             }}
-            maxLength={100}
-            description={`${name.length}/100 characters`}
           />
           <Textarea
+            description={`${description.length}/500 characters`}
             label="Description"
+            maxLength={500}
+            minRows={3}
             placeholder="Optional description for this webhook"
             size="lg"
             value={description}
@@ -130,9 +136,6 @@ export function CreateWebhookModal({
               setDescription(e.target.value);
               setError("");
             }}
-            maxLength={500}
-            description={`${description.length}/500 characters`}
-            minRows={3}
           />
         </ModalBody>
         <ModalFooter>
@@ -147,4 +150,3 @@ export function CreateWebhookModal({
     </Modal>
   );
 }
-

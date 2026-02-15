@@ -49,16 +49,19 @@ export function EditWebhookModal({
 
     if (!name.trim()) {
       setError("Webhook name is required");
+
       return;
     }
 
     if (name.length > 100) {
       setError("Webhook name must be 100 characters or less");
+
       return;
     }
 
     if (description.length > 500) {
       setError("Description must be 500 characters or less");
+
       return;
     }
 
@@ -126,7 +129,9 @@ export function EditWebhookModal({
             </div>
           )}
           <Input
+            description={`${name.length}/100 characters`}
             label="Webhook Name"
+            maxLength={100}
             placeholder="e.g., Payment Webhook, User Events"
             size="lg"
             value={name}
@@ -135,11 +140,12 @@ export function EditWebhookModal({
               setName(e.target.value);
               setError("");
             }}
-            maxLength={100}
-            description={`${name.length}/100 characters`}
           />
           <Textarea
+            description={`${description.length}/500 characters`}
             label="Description"
+            maxLength={500}
+            minRows={3}
             placeholder="Optional description for this webhook"
             size="lg"
             value={description}
@@ -148,9 +154,6 @@ export function EditWebhookModal({
               setDescription(e.target.value);
               setError("");
             }}
-            maxLength={500}
-            description={`${description.length}/500 characters`}
-            minRows={3}
           />
           <div className="flex items-center justify-between p-3 bg-default-50 rounded-lg">
             <div className="flex flex-col">
@@ -175,11 +178,7 @@ export function EditWebhookModal({
           <Button color="danger" variant="light" onPress={handleClose}>
             Cancel
           </Button>
-          <Button
-            color="primary"
-            isLoading={isUpdating}
-            onPress={handleUpdate}
-          >
+          <Button color="primary" isLoading={isUpdating} onPress={handleUpdate}>
             Update Webhook
           </Button>
         </ModalFooter>
@@ -187,4 +186,3 @@ export function EditWebhookModal({
     </Modal>
   );
 }
-

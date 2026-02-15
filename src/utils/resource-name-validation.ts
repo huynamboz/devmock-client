@@ -81,7 +81,8 @@ export function validateResourceName(name: string): {
 
     return {
       isValid: false,
-      error: "Resource name format is invalid. Use lowercase letters, numbers, hyphens, or underscores.",
+      error:
+        "Resource name format is invalid. Use lowercase letters, numbers, hyphens, or underscores.",
     };
   }
 
@@ -97,7 +98,13 @@ export function validateResourceName(name: string): {
 export const RESOURCE_NAME_PATTERN = /^[a-z]([a-z0-9-_]*[a-z0-9])?$/;
 
 export const RESOURCE_NAME_EXAMPLES = {
-  valid: ["users", "user-posts", "posts", "order_items", "products", "categories"],
+  valid: [
+    "users",
+    "user-posts",
+    "posts",
+    "order_items",
+    "products",
+    "categories",
+  ],
   invalid: ["Users", "-users", "users-", "user posts", "users_", "_users"],
 };
-

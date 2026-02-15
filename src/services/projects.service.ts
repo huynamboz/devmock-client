@@ -1,5 +1,6 @@
-import { apiClient } from "@/lib/api-client";
 import type { CreateProjectRequest, Project } from "@/types/project";
+
+import { apiClient } from "@/lib/api-client";
 
 class ProjectsService {
   /**
@@ -7,6 +8,7 @@ class ProjectsService {
    */
   async getAll(): Promise<Project[]> {
     const response = await apiClient.get<Project[]>("/projects");
+
     return response.data;
   }
 
@@ -15,6 +17,7 @@ class ProjectsService {
    */
   async getById(id: string): Promise<Project> {
     const response = await apiClient.get<Project>(`/projects/${id}`);
+
     return response.data;
   }
 
@@ -23,6 +26,7 @@ class ProjectsService {
    */
   async create(data: CreateProjectRequest): Promise<Project> {
     const response = await apiClient.post<Project>("/projects", data);
+
     return response.data;
   }
 
@@ -35,4 +39,3 @@ class ProjectsService {
 }
 
 export const projectsService = new ProjectsService();
-

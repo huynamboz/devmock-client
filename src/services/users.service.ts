@@ -1,5 +1,6 @@
-import { apiClient } from "@/lib/api-client";
 import type { User } from "@/types/auth";
+
+import { apiClient } from "@/lib/api-client";
 
 export interface GetUsersParams {
   page?: number;
@@ -49,12 +50,9 @@ class UsersService {
    * Get all users with pagination and filters
    */
   async getAll(params?: GetUsersParams): Promise<GetUsersResponse> {
-    const response = await apiClient.get<GetUsersResponse>(
-      this.baseURL,
-      {
-        params,
-      },
-    );
+    const response = await apiClient.get<GetUsersResponse>(this.baseURL, {
+      params,
+    });
 
     return response.data;
   }
@@ -98,4 +96,3 @@ class UsersService {
 }
 
 export const usersService = new UsersService();
-

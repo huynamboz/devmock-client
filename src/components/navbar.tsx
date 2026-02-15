@@ -89,8 +89,7 @@ export const Navbar = () => {
           {siteConfig.navItems.map((item) => {
             const isActive =
               location.pathname === item.href ||
-              (item.href !== "/" &&
-                location.pathname.startsWith(item.href));
+              (item.href !== "/" && location.pathname.startsWith(item.href));
 
             return (
               <NavbarItem key={item.href}>
@@ -349,15 +348,12 @@ export const Navbar = () => {
           {siteConfig.navMenuItems.map((item, index) => {
             const isActive =
               location.pathname === item.href ||
-              (item.href !== "/" &&
-                location.pathname.startsWith(item.href));
+              (item.href !== "/" && location.pathname.startsWith(item.href));
 
             return (
               <NavbarMenuItem key={`${item}-${index}`}>
                 <Link
-                  className={clsx(
-                    isActive && "text-primary font-medium",
-                  )}
+                  className={clsx(isActive && "text-primary font-medium")}
                   color={
                     index === siteConfig.navMenuItems.length - 1
                       ? "danger"

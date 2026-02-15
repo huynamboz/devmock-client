@@ -5,13 +5,14 @@ import { Button } from "@heroui/button";
 import { Loader2, Plus, Webhook as WebhookIcon } from "lucide-react";
 import { addToast } from "@heroui/toast";
 
-import { webhooksService } from "@/services/webhooks.service";
 import { CreateWebhookModal } from "./create-webhook-modal";
 import { EditWebhookModal } from "./edit-webhook-modal";
 import { DeleteWebhookModal } from "./delete-webhook-modal";
 import { WebhookLogsModal } from "./webhook-logs-modal";
 import { TestWebhookModal } from "./test-webhook-modal";
 import { WebhookItem } from "./webhook-item";
+
+import { webhooksService } from "@/services/webhooks.service";
 
 export function WebhooksSection() {
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
@@ -37,6 +38,7 @@ export function WebhooksSection() {
       setError("");
 
       const data = await webhooksService.getAll();
+
       setWebhooks(data);
     } catch (err) {
       setError(
@@ -68,6 +70,7 @@ export function WebhooksSection() {
 
   const handleCopy = async (webhookId: string) => {
     const webhook = webhooks.find((w) => w.id === webhookId);
+
     if (!webhook) return;
 
     try {
@@ -171,13 +174,13 @@ export function WebhooksSection() {
           {webhooks.map((webhook) => (
             <WebhookItem
               key={webhook.id}
-              webhook={webhook}
               isCopied={copiedWebhookId === webhook.id}
+              webhook={webhook}
               onCopy={handleCopy}
-              onEdit={handleEdit}
               onDelete={handleDelete}
-              onViewLogs={handleViewLogs}
+              onEdit={handleEdit}
               onTest={handleTest}
+              onViewLogs={handleViewLogs}
             />
           ))}
         </div>
@@ -231,4 +234,3 @@ export function WebhooksSection() {
     </div>
   );
 }
-

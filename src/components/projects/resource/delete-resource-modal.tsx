@@ -35,8 +35,8 @@ export function DeleteResourceModal({
         <ModalBody>
           <div className="p-4 bg-danger/10 border border-danger/20 rounded-lg">
             <p className="text-sm font-medium text-danger mb-2">
-              Warning: This will delete the resource &quot;{resourceName}&quot; and
-              all its fields permanently.
+              Warning: This will delete the resource &quot;{resourceName}&quot;
+              and all its fields permanently.
             </p>
           </div>
         </ModalBody>
@@ -52,4 +52,3 @@ export function DeleteResourceModal({
     </Modal>
   );
 }
-

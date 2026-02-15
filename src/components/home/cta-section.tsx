@@ -108,7 +108,13 @@ export function CTASection() {
               >
                 Get Started Free
               </Button>
-              <Button className="w-full sm:w-auto" as="a" href="/pricing" size="lg" variant="bordered">
+              <Button
+                as="a"
+                className="w-full sm:w-auto"
+                href="/pricing"
+                size="lg"
+                variant="bordered"
+              >
                 View Pricing
               </Button>
             </motion.div>

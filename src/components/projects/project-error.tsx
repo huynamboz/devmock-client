@@ -41,4 +41,3 @@ export function ProjectError({ error }: ProjectErrorProps) {
     </div>
   );
 }
-

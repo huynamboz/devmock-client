@@ -4,7 +4,8 @@ import type {
   ResourceWithSettings,
   UpdateResourceSettingsRequest,
 } from "@/types/project";
-import {ScrollShadow} from "@heroui/scroll-shadow";
+
+import { ScrollShadow } from "@heroui/scroll-shadow";
 import { useState, useEffect } from "react";
 import {
   Settings,

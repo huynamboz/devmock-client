@@ -113,4 +113,3 @@ class RecordsService {
 }
 
 export const recordsService = new RecordsService();
-

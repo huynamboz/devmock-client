@@ -77,11 +77,7 @@ export function DeleteLogsModal({
           <Button color="default" variant="light" onPress={onClose}>
             Cancel
           </Button>
-          <Button
-            color="danger"
-            isLoading={isDeleting}
-            onPress={handleDelete}
-          >
+          <Button color="danger" isLoading={isDeleting} onPress={handleDelete}>
             {isDeleteAll ? "Delete All" : "Delete"}
           </Button>
         </ModalFooter>
@@ -89,4 +85,3 @@ export function DeleteLogsModal({
     </Modal>
   );
 }
-

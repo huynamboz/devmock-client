@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
 import { useAuthStore } from "@/stores/auth.store";
 import { STORAGE_KEYS } from "@/config/api";
+import AdminLayout from "@/layouts/admin-layout";
 
 /**
  * AdminRoute component - Protects routes that require ADMIN role
@@ -70,7 +71,6 @@ export function AdminRoute() {
     return <Navigate replace to="/projects" />;
   }
 
-  // User is authenticated and is admin, render admin content
-  return <Outlet />;
+  // User is authenticated and is admin, render admin layout with sidebar + header
+  return <AdminLayout />;
 }
-

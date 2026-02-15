@@ -109,7 +109,9 @@ export function BenefitsSection() {
                   {benefit.icon}
                 </div>
               </motion.div>
-              <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">{benefit.title}</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">
+                {benefit.title}
+              </h3>
               <p className="text-xs sm:text-sm text-default-600 leading-relaxed">
                 {benefit.description}
               </p>

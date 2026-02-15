@@ -105,7 +105,7 @@ export default function ProjectsPage() {
   return (
     <DefaultLayout>
       <div className="background-grid flex-grow">
-        <BackgroundRippleEffect cellSize={50}/>
+        <BackgroundRippleEffect cellSize={50} />
         <div className="container relative z-10 mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">

@@ -1,5 +1,5 @@
 // App.tsx
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
@@ -12,8 +12,10 @@ import AboutPage from "./pages/about";
 import ProjectsPage from "./pages/projects";
 import WebhooksPage from "./pages/webhooks";
 import WebhookDetailPage from "./pages/webhook-detail";
-import AdminUsersPage from "./pages/admin/users";
-import AdminResourcesPage from "./pages/admin/resources";
+import AdminSpeakingTopicsPage from "./pages/admin/speaking/topics";
+import AdminSpeakingTopicDetailPage from "./pages/admin/speaking/topic-detail";
+import AdminSpeakingLessonDetailPage from "./pages/admin/speaking/lesson-detail";
+import AdminDevelopmentPage from "./pages/admin/development";
 
 import { PublicRoute } from "@/components/public-route";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -23,9 +25,18 @@ function App() {
   return (
     <Routes>
       {/* Admin Routes - requires ADMIN role */}
-      <Route element={<AdminRoute />}>
-        <Route element={<AdminUsersPage />} path="/admin/users" />
-        <Route element={<AdminResourcesPage />} path="/admin/resources" />
+      <Route element={<AdminRoute />} path="/admin">
+        <Route index element={<Navigate replace to="/admin/speaking" />} />
+        <Route element={<AdminSpeakingTopicsPage />} path="speaking" />
+        <Route
+          element={<AdminSpeakingTopicDetailPage />}
+          path="speaking/topics/:id"
+        />
+        <Route
+          element={<AdminSpeakingLessonDetailPage />}
+          path="speaking/lessons/:id"
+        />
+        <Route element={<AdminDevelopmentPage />} path="dev" />
       </Route>
 
       {/* Protected Layout - chỉ check auth 1 lần */}

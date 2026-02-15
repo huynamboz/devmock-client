@@ -17,6 +17,7 @@ class WebhooksService {
    */
   async getAll(): Promise<Webhook[]> {
     const response = await apiClient.get<Webhook[]>(this.baseURL);
+
     return response.data;
   }
 
@@ -25,6 +26,7 @@ class WebhooksService {
    */
   async getById(id: string): Promise<Webhook> {
     const response = await apiClient.get<Webhook>(`${this.baseURL}/${id}`);
+
     return response.data;
   }
 
@@ -33,6 +35,7 @@ class WebhooksService {
    */
   async create(data: CreateWebhookRequest): Promise<Webhook> {
     const response = await apiClient.post<Webhook>(this.baseURL, data);
+
     return response.data;
   }
 
@@ -40,7 +43,11 @@ class WebhooksService {
    * Update webhook
    */
   async update(id: string, data: UpdateWebhookRequest): Promise<Webhook> {
-    const response = await apiClient.put<Webhook>(`${this.baseURL}/${id}`, data);
+    const response = await apiClient.put<Webhook>(
+      `${this.baseURL}/${id}`,
+      data,
+    );
+
     return response.data;
   }
 
@@ -64,6 +71,7 @@ class WebhooksService {
         params,
       },
     );
+
     return response.data;
   }
 
@@ -74,6 +82,7 @@ class WebhooksService {
     const response = await apiClient.get<WebhookLog>(
       `${this.baseURL}/${webhookId}/logs/${logId}`,
     );
+
     return response.data;
   }
 
@@ -91,9 +100,9 @@ class WebhooksService {
     const response = await apiClient.delete<{ deletedCount: number }>(
       `${this.baseURL}/${webhookId}/logs`,
     );
+
     return response.data;
   }
 }
 
 export const webhooksService = new WebhooksService();
-

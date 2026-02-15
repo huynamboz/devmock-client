@@ -1,6 +1,7 @@
-import type { Webhook } from "@/types/webhook";
+import type { SpeakingItem } from "@/services/speaking.service";
 
 import { useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@heroui/button";
 import {
   Modal,
@@ -10,54 +11,48 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { addToast } from "@heroui/toast";
-import { AlertTriangle } from "lucide-react";
 
-import { webhooksService } from "@/services/webhooks.service";
+import { speakingService } from "@/services/speaking.service";
 
-interface DeleteWebhookModalProps {
+interface DeleteItemModalProps {
   isOpen: boolean;
-  webhook: Webhook | null;
+  item: SpeakingItem | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function DeleteWebhookModal({
+export function DeleteItemModal({
   isOpen,
-  webhook,
+  item,
   onClose,
   onSuccess,
-}: DeleteWebhookModalProps) {
+}: DeleteItemModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState("");
 
   const handleDelete = async () => {
-    if (!webhook) return;
+    if (!item) return;
 
     try {
       setIsDeleting(true);
       setError("");
-
-      await webhooksService.delete(webhook.id);
-
+      await speakingService.deleteItem(item.id);
       addToast({
-        title: "Webhook deleted successfully",
-        description: `Webhook "${webhook.name}" and all its logs have been deleted.`,
+        title: "Item deleted",
+        description: "Speaking item has been deleted.",
         color: "success",
         variant: "flat",
       });
-
       onSuccess();
       onClose();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete webhook.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to delete item.");
     } finally {
       setIsDeleting(false);
     }
   };
 
-  if (!webhook) return null;
+  if (!item) return null;
 
   return (
     <Modal isOpen={isOpen} placement="center" size="md" onClose={onClose}>
@@ -65,30 +60,28 @@ export function DeleteWebhookModal({
         <ModalHeader className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-danger" />
-            <h2 className="text-2xl font-semibold">Delete Webhook</h2>
+            <h2 className="text-xl font-semibold">Delete Item</h2>
           </div>
         </ModalHeader>
         <ModalBody>
           {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+            <div className="rounded-lg border border-danger-200 bg-danger-50 p-3 text-sm text-danger-700">
               {error}
             </div>
           )}
           <p className="text-default-600">
-            Are you sure you want to delete the webhook{" "}
-            <span className="font-semibold text-foreground">
-              &quot;{webhook.name}&quot;
-            </span>
-            ? This action cannot be undone and will delete all webhook logs
-            associated with this webhook.
+            Are you sure you want to delete this speaking item?
+          </p>
+          <p className="mt-2 rounded-lg bg-default-100 p-3 font-medium text-foreground dark:bg-default-100/50">
+            {item.textOriginal}
           </p>
         </ModalBody>
         <ModalFooter>
-          <Button color="default" variant="light" onPress={onClose}>
+          <Button variant="light" onPress={onClose}>
             Cancel
           </Button>
           <Button color="danger" isLoading={isDeleting} onPress={handleDelete}>
-            Delete Webhook
+            Delete
           </Button>
         </ModalFooter>
       </ModalContent>

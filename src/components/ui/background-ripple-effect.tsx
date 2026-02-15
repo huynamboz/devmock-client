@@ -1,5 +1,6 @@
 "use client";
 import React, { useMemo, useRef, useState } from "react";
+
 import { cn } from "@/lib/utils";
 
 export const BackgroundRippleEffect = ({
@@ -31,18 +32,18 @@ export const BackgroundRippleEffect = ({
         <div className="pointer-events-none absolute inset-0 z-[2] h-full w-full overflow-hidden" />
         <DivGrid
           key={`base-${rippleKey}`}
-          className="mask-radial-from-20% mask-radial-at-top opacity-600"
-          rows={rows}
-          cols={cols}
-          cellSize={cellSize}
+          interactive
           borderColor="var(--cell-border-color)"
-          fillColor="var(--cell-fill-color)"
+          cellSize={cellSize}
+          className="mask-radial-from-20% mask-radial-at-top opacity-600"
           clickedCell={clickedCell}
+          cols={cols}
+          fillColor="var(--cell-fill-color)"
+          rows={rows}
           onCellClick={(row, col) => {
             setClickedCell({ row, col });
             setRippleKey((k) => k + 1);
           }}
-          interactive
         />
       </div>
     </div>

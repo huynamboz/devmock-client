@@ -149,9 +149,7 @@ export function WebhookLogDetail({
         <div className="space-y-2 text-sm">
           <div>
             <span className="text-default-500">Time: </span>
-            <span className="font-medium">
-              {formatDateTime(log.createdAt)}
-            </span>
+            <span className="font-medium">{formatDateTime(log.createdAt)}</span>
           </div>
           <div>
             <span className="text-default-500">IP Address: </span>
