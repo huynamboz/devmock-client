@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Loader2,
@@ -14,7 +14,10 @@ import {
   ArrowRight,
   Save,
   Crown,
-  Image,
+  Upload,
+  X,
+  Globe,
+  Check,
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -37,13 +40,20 @@ import {
   type SpeakingLesson,
   type UpdateTopicRequest,
 } from "@/services/speaking.service";
+import {
+  translationService,
+  type Translation,
+} from "@/services/translation.service";
+import { LANGUAGES, getLanguageByCode } from "@/config/languages";
 import { LessonFormModal } from "@/components/admin/speaking/lesson-form-modal";
 import { DeleteLessonModal } from "@/components/admin/speaking/delete-lesson-modal";
+import { useFileUpload } from "@/hooks/use-file-upload";
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 export default function AdminSpeakingTopicDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const [topic, setTopic] = useState<SpeakingTopic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,6 +72,40 @@ export default function AdminSpeakingTopicDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Translation state
+  const [translations, setTranslations] = useState<Translation[]>([]);
+  const [editingTranslations, setEditingTranslations] = useState<
+    Record<string, string>
+  >({});
+  const [savingTranslationId, setSavingTranslationId] = useState<string | null>(
+    null,
+  );
+  const [addingField, setAddingField] = useState<string | null>(null);
+  const [newLangCode, setNewLangCode] = useState("");
+  const [newLangValue, setNewLangValue] = useState("");
+  const [isSavingNew, setIsSavingNew] = useState(false);
+
+  const {
+    upload: uploadFile,
+    isUploading,
+    progress: uploadProgress,
+  } = useFileUpload();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+    // Reset input so the same file can be re-selected
+    e.target.value = "";
+
+    const result = await uploadFile(file);
+
+    if (result) {
+      setEditThumbnailUrl(result.url);
+      markChanged();
+    }
+  };
+
   const {
     isOpen: isFormOpen,
     onOpen: onFormOpen,
@@ -74,7 +118,10 @@ export default function AdminSpeakingTopicDetailPage() {
   } = useDisclosure();
 
   useEffect(() => {
-    if (id) loadTopic();
+    if (id) {
+      loadTopic();
+      loadTranslations();
+    }
   }, [id]);
 
   // Sync edit form when topic loads
@@ -106,6 +153,130 @@ export default function AdminSpeakingTopicDetailPage() {
   };
 
   const markChanged = () => setHasChanges(true);
+
+  const loadTranslations = async () => {
+    if (!id) return;
+    try {
+      const data = await translationService.getTranslations({
+        entityType: "topic",
+        entityId: id,
+      });
+
+      setTranslations(data);
+      // Init editing values
+      const editMap: Record<string, string> = {};
+
+      data.forEach((t) => {
+        editMap[t.id] = t.value;
+      });
+      setEditingTranslations(editMap);
+    } catch {
+      // silently fail — translations are supplementary
+    }
+  };
+
+  const translationsForField = (field: string) =>
+    translations.filter((t) => t.field === field);
+
+  const usedLanguagesForField = (field: string) =>
+    new Set(translationsForField(field).map((t) => t.language));
+
+  const handleSaveTranslation = async (t: Translation) => {
+    const newValue = editingTranslations[t.id];
+
+    if (newValue === undefined || newValue === t.value) return;
+    try {
+      setSavingTranslationId(t.id);
+      const updated = await translationService.updateTranslation(t.id, {
+        value: newValue,
+      });
+
+      setTranslations((prev) =>
+        prev.map((tr) => (tr.id === updated.id ? updated : tr)),
+      );
+      setEditingTranslations((prev) => ({
+        ...prev,
+        [updated.id]: updated.value,
+      }));
+      addToast({
+        title: "Translation updated",
+        color: "success",
+        variant: "flat",
+      });
+    } catch (err) {
+      addToast({
+        title: "Failed to update translation",
+        description: err instanceof Error ? err.message : "Unknown error",
+        color: "danger",
+        variant: "flat",
+      });
+    } finally {
+      setSavingTranslationId(null);
+    }
+  };
+
+  const handleDeleteTranslation = async (t: Translation) => {
+    try {
+      await translationService.deleteTranslation(t.id);
+      setTranslations((prev) => prev.filter((tr) => tr.id !== t.id));
+      setEditingTranslations((prev) => {
+        const copy = { ...prev };
+
+        delete copy[t.id];
+
+        return copy;
+      });
+      addToast({
+        title: "Translation deleted",
+        color: "success",
+        variant: "flat",
+      });
+    } catch (err) {
+      addToast({
+        title: "Failed to delete translation",
+        description: err instanceof Error ? err.message : "Unknown error",
+        color: "danger",
+        variant: "flat",
+      });
+    }
+  };
+
+  const handleAddTranslation = async (field: string) => {
+    if (!id || !newLangCode || !newLangValue.trim()) return;
+    try {
+      setIsSavingNew(true);
+      const created = await translationService.createTranslation({
+        entityType: "topic",
+        entityId: id,
+        field,
+        language: newLangCode,
+        value: newLangValue.trim(),
+      });
+
+      setTranslations((prev) => [...prev, created]);
+      setEditingTranslations((prev) => ({
+        ...prev,
+        [created.id]: created.value,
+      }));
+      setAddingField(null);
+      setNewLangCode("");
+      setNewLangValue("");
+      addToast({
+        title: "Translation added",
+        color: "success",
+        variant: "flat",
+      });
+    } catch (err) {
+      addToast({
+        title: "Failed to add translation",
+        description: err instanceof Error ? err.message : "Unknown error",
+        color: "danger",
+        variant: "flat",
+      });
+    } finally {
+      setIsSavingNew(false);
+    }
+  };
 
   const handleSaveTopic = async () => {
     if (!id || !topic) return;
@@ -272,53 +443,382 @@ export default function AdminSpeakingTopicDetailPage() {
 
               {/* Thumbnail preview */}
               <div className="mb-4">
+                <input
+                  ref={fileInputRef}
+                  accept="image/*"
+                  className="hidden"
+                  type="file"
+                  onChange={handleFileChange}
+                />
                 {editThumbnailUrl ? (
-                  <div className="relative overflow-hidden rounded-xl">
+                  <div className="group relative overflow-hidden rounded-xl">
                     <img
                       alt="Thumbnail"
                       className="h-40 w-full object-cover"
                       src={editThumbnailUrl}
                     />
+                    <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Button
+                        isIconOnly
+                        aria-label="Change thumbnail"
+                        radius="full"
+                        size="sm"
+                        variant="flat"
+                        onPress={() => fileInputRef.current?.click()}
+                      >
+                        <Upload className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        isIconOnly
+                        aria-label="Remove thumbnail"
+                        color="danger"
+                        radius="full"
+                        size="sm"
+                        variant="flat"
+                        onPress={() => {
+                          setEditThumbnailUrl("");
+                          markChanged();
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex h-32 w-full items-center justify-center rounded-xl border-2 border-dashed border-default-200 bg-default-50">
+                  <button
+                    className="flex h-32 w-full items-center justify-center rounded-xl border-2 border-dashed border-default-200 bg-default-50 transition-colors hover:border-primary hover:bg-primary-50/30"
+                    disabled={isUploading}
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
                     <div className="text-center">
-                      <Image className="mx-auto h-8 w-8 text-default-300" />
+                      <Upload className="mx-auto h-8 w-8 text-default-300" />
                       <p className="mt-1 text-xs text-default-400">
-                        No thumbnail
+                        Click to upload
                       </p>
                     </div>
+                  </button>
+                )}
+                {isUploading && (
+                  <div className="mt-2">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-default-100">
+                      <div
+                        className="h-full rounded-full bg-primary transition-all"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-right text-xs text-default-400">
+                      {uploadProgress}%
+                    </p>
                   </div>
                 )}
               </div>
 
               <div className="space-y-3">
-                <Input
-                  label="Title"
-                  labelPlacement="outside"
-                  placeholder="Topic title"
-                  size="sm"
-                  value={editTitle}
-                  variant="bordered"
-                  onValueChange={(v) => {
-                    setEditTitle(v);
-                    markChanged();
-                  }}
-                />
-                <Textarea
-                  label="Description"
-                  labelPlacement="outside"
-                  maxRows={4}
-                  minRows={2}
-                  placeholder="Optional description"
-                  size="sm"
-                  value={editDescription}
-                  variant="bordered"
-                  onValueChange={(v) => {
-                    setEditDescription(v);
-                    markChanged();
-                  }}
-                />
+                {/* Title + translations */}
+                <div>
+                  <Input
+                    label="Title"
+                    labelPlacement="outside"
+                    placeholder="Topic title"
+                    size="sm"
+                    value={editTitle}
+                    variant="bordered"
+                    onValueChange={(v) => {
+                      setEditTitle(v);
+                      markChanged();
+                    }}
+                  />
+                  {/* Title translations */}
+                  {translationsForField("title").length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {translationsForField("title").map((t) => {
+                        const lang = getLanguageByCode(t.language);
+
+                        return (
+                          <div key={t.id} className="flex items-center gap-1.5">
+                            <span
+                              className="shrink-0 text-base leading-none"
+                              title={lang?.name ?? t.language}
+                            >
+                              {lang?.flag ?? "🌐"}
+                            </span>
+                            <span className="w-6 shrink-0 text-[10px] font-medium uppercase text-default-400">
+                              {t.language}
+                            </span>
+                            <Input
+                              className="flex-1"
+                              placeholder="Translation..."
+                              size="sm"
+                              value={editingTranslations[t.id] ?? t.value}
+                              variant="bordered"
+                              onValueChange={(v) =>
+                                setEditingTranslations((prev) => ({
+                                  ...prev,
+                                  [t.id]: v,
+                                }))
+                              }
+                            />
+                            <Button
+                              isIconOnly
+                              aria-label="Save"
+                              isDisabled={editingTranslations[t.id] === t.value}
+                              isLoading={savingTranslationId === t.id}
+                              radius="full"
+                              size="sm"
+                              variant="light"
+                              onPress={() => handleSaveTranslation(t)}
+                            >
+                              <Check className="h-3.5 w-3.5 text-success" />
+                            </Button>
+                            <Button
+                              isIconOnly
+                              aria-label="Delete"
+                              radius="full"
+                              size="sm"
+                              variant="light"
+                              onPress={() => handleDeleteTranslation(t)}
+                            >
+                              <X className="h-3.5 w-3.5 text-danger" />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {/* Add title translation */}
+                  {addingField === "title" ? (
+                    <div className="mt-2 space-y-1.5 rounded-lg border border-default-200 bg-default-50 p-2.5 dark:bg-default-100/30">
+                      <Select
+                        aria-label="Language"
+                        placeholder="Select language"
+                        selectedKeys={newLangCode ? [newLangCode] : []}
+                        size="sm"
+                        variant="bordered"
+                        onSelectionChange={(keys) => {
+                          const k = Array.from(keys)[0] as string;
+
+                          if (k) setNewLangCode(k);
+                        }}
+                      >
+                        {LANGUAGES.filter(
+                          (l) =>
+                            !usedLanguagesForField("title").has(l.code),
+                        ).map((l) => (
+                          <SelectItem
+                            key={l.code}
+                            textValue={`${l.flag} ${l.name}`}
+                          >
+                            <span>
+                              {l.flag} {l.name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </Select>
+                      <Input
+                        placeholder="Translated title..."
+                        size="sm"
+                        value={newLangValue}
+                        variant="bordered"
+                        onValueChange={setNewLangValue}
+                      />
+                      <div className="flex gap-1.5">
+                        <Button
+                          className="flex-1"
+                          color="primary"
+                          isDisabled={!newLangCode || !newLangValue.trim()}
+                          isLoading={isSavingNew}
+                          size="sm"
+                          onPress={() => handleAddTranslation("title")}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          onPress={() => {
+                            setAddingField(null);
+                            setNewLangCode("");
+                            setNewLangValue("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className="mt-1.5 flex items-center gap-1 text-xs text-primary hover:underline"
+                      type="button"
+                      onClick={() => {
+                        setAddingField("title");
+                        setNewLangCode("");
+                        setNewLangValue("");
+                      }}
+                    >
+                      <Globe className="h-3 w-3" />
+                      Add language
+                    </button>
+                  )}
+                </div>
+
+                {/* Description + translations */}
+                <div>
+                  <Textarea
+                    label="Description"
+                    labelPlacement="outside"
+                    maxRows={4}
+                    minRows={2}
+                    placeholder="Optional description"
+                    size="sm"
+                    value={editDescription}
+                    variant="bordered"
+                    onValueChange={(v) => {
+                      setEditDescription(v);
+                      markChanged();
+                    }}
+                  />
+                  {/* Description translations */}
+                  {translationsForField("description").length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {translationsForField("description").map((t) => {
+                        const lang = getLanguageByCode(t.language);
+
+                        return (
+                          <div key={t.id} className="flex items-start gap-1.5">
+                            <span
+                              className="mt-2 shrink-0 text-base leading-none"
+                              title={lang?.name ?? t.language}
+                            >
+                              {lang?.flag ?? "🌐"}
+                            </span>
+                            <span className="mt-2 w-6 shrink-0 text-[10px] font-medium uppercase text-default-400">
+                              {t.language}
+                            </span>
+                            <Textarea
+                              className="flex-1"
+                              maxRows={3}
+                              minRows={1}
+                              placeholder="Translation..."
+                              size="sm"
+                              value={editingTranslations[t.id] ?? t.value}
+                              variant="bordered"
+                              onValueChange={(v) =>
+                                setEditingTranslations((prev) => ({
+                                  ...prev,
+                                  [t.id]: v,
+                                }))
+                              }
+                            />
+                            <div className="mt-1 flex flex-col gap-0.5">
+                              <Button
+                                isIconOnly
+                                aria-label="Save"
+                                isDisabled={
+                                  editingTranslations[t.id] === t.value
+                                }
+                                isLoading={savingTranslationId === t.id}
+                                radius="full"
+                                size="sm"
+                                variant="light"
+                                onPress={() => handleSaveTranslation(t)}
+                              >
+                                <Check className="h-3.5 w-3.5 text-success" />
+                              </Button>
+                              <Button
+                                isIconOnly
+                                aria-label="Delete"
+                                radius="full"
+                                size="sm"
+                                variant="light"
+                                onPress={() => handleDeleteTranslation(t)}
+                              >
+                                <X className="h-3.5 w-3.5 text-danger" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {/* Add description translation */}
+                  {addingField === "description" ? (
+                    <div className="mt-2 space-y-1.5 rounded-lg border border-default-200 bg-default-50 p-2.5 dark:bg-default-100/30">
+                      <Select
+                        aria-label="Language"
+                        placeholder="Select language"
+                        selectedKeys={newLangCode ? [newLangCode] : []}
+                        size="sm"
+                        variant="bordered"
+                        onSelectionChange={(keys) => {
+                          const k = Array.from(keys)[0] as string;
+
+                          if (k) setNewLangCode(k);
+                        }}
+                      >
+                        {LANGUAGES.filter(
+                          (l) =>
+                            !usedLanguagesForField("description").has(l.code),
+                        ).map((l) => (
+                          <SelectItem
+                            key={l.code}
+                            textValue={`${l.flag} ${l.name}`}
+                          >
+                            <span>
+                              {l.flag} {l.name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </Select>
+                      <Textarea
+                        maxRows={3}
+                        minRows={1}
+                        placeholder="Translated description..."
+                        size="sm"
+                        value={newLangValue}
+                        variant="bordered"
+                        onValueChange={setNewLangValue}
+                      />
+                      <div className="flex gap-1.5">
+                        <Button
+                          className="flex-1"
+                          color="primary"
+                          isDisabled={!newLangCode || !newLangValue.trim()}
+                          isLoading={isSavingNew}
+                          size="sm"
+                          onPress={() => handleAddTranslation("description")}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          onPress={() => {
+                            setAddingField(null);
+                            setNewLangCode("");
+                            setNewLangValue("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className="mt-1.5 flex items-center gap-1 text-xs text-primary hover:underline"
+                      type="button"
+                      onClick={() => {
+                        setAddingField("description");
+                        setNewLangCode("");
+                        setNewLangValue("");
+                      }}
+                    >
+                      <Globe className="h-3 w-3" />
+                      Add language
+                    </button>
+                  )}
+                </div>
+
                 <Input
                   label="Thumbnail URL"
                   labelPlacement="outside"
