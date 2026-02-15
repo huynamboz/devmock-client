@@ -4,7 +4,7 @@ import type {
 } from "@/services/speaking.service";
 
 import { useEffect, useState } from "react";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Globe } from "lucide-react";
 import { Button } from "@heroui/button";
 import {
   Modal,
@@ -18,6 +18,7 @@ import { Textarea } from "@heroui/input";
 import { addToast } from "@heroui/toast";
 
 import { speakingService } from "@/services/speaking.service";
+import { TranslationDialog } from "@/components/admin/translation-dialog";
 
 interface ItemFormModalProps {
   isOpen: boolean;
@@ -36,19 +37,20 @@ export function ItemFormModal({
 }: ItemFormModalProps) {
   const isEdit = !!item;
   const [textOriginal, setTextOriginal] = useState("");
-  const [textTranslation, setTextTranslation] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
-  const [phonetic, setPhonetic] = useState("");
+  const [ipa, setIpa] = useState("");
   const [orderIndex, setOrderIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Translation dialog state
+  const [translationField, setTranslationField] = useState<string | null>(null);
+
   useEffect(() => {
     if (isOpen) {
       setTextOriginal(item?.textOriginal ?? "");
-      setTextTranslation(item?.textTranslation ?? "");
       setAudioUrl(item?.audioUrl ?? "");
-      setPhonetic(item?.phonetic ?? "");
+      setIpa(item?.ipa ?? "");
       setOrderIndex(item?.orderIndex ?? 0);
       setError("");
     }
@@ -68,9 +70,8 @@ export function ItemFormModal({
       const body: CreateItemRequest = {
         lessonId: isEdit && item ? item.lessonId : lessonId,
         textOriginal: textOriginal.trim(),
-        textTranslation: textTranslation.trim() || null,
         audioUrl: audioUrl.trim() || null,
-        phonetic: phonetic.trim() || null,
+        ipa: ipa.trim() || null,
         orderIndex,
       };
 
@@ -103,6 +104,7 @@ export function ItemFormModal({
 
   const handleClose = () => {
     setError("");
+    setTranslationField(null);
     onClose();
   };
 
@@ -123,29 +125,34 @@ export function ItemFormModal({
               {error}
             </div>
           )}
-          <Textarea
-            label="Original text"
-            placeholder="e.g. Xin chào, tôi là Nam."
-            value={textOriginal}
-            variant="bordered"
-            onValueChange={(v) => {
-              setTextOriginal(v);
-              setError("");
-            }}
-          />
+          <div>
+            <Textarea
+              label="Original text"
+              placeholder="e.g. Xin chào, tôi là Nam."
+              value={textOriginal}
+              variant="bordered"
+              onValueChange={(v) => {
+                setTextOriginal(v);
+                setError("");
+              }}
+            />
+            {isEdit && item && (
+              <button
+                className="mt-1.5 flex items-center gap-1 text-xs text-primary hover:underline"
+                type="button"
+                onClick={() => setTranslationField("textOriginal")}
+              >
+                <Globe className="h-3 w-3" />
+                Translations
+              </button>
+            )}
+          </div>
           <Input
-            label="Translation"
-            placeholder="e.g. Hello, I am Nam."
-            value={textTranslation}
-            variant="bordered"
-            onValueChange={(v) => setTextTranslation(v)}
-          />
-          <Input
-            label="Phonetic"
+            label="IPA"
             placeholder="e.g. sin tʃaʊ, toj la nam"
-            value={phonetic}
+            value={ipa}
             variant="bordered"
-            onValueChange={(v) => setPhonetic(v)}
+            onValueChange={(v) => setIpa(v)}
           />
           <Input
             label="Audio URL"
@@ -175,6 +182,17 @@ export function ItemFormModal({
           </Button>
         </ModalFooter>
       </ModalContent>
+      {isEdit && item && (
+        <TranslationDialog
+          entityId={item.id}
+          entityType="item"
+          field={translationField ?? ""}
+          isOpen={!!translationField}
+          multiline={translationField === "textOriginal"}
+          text={translationField === "textOriginal" ? textOriginal : ""}
+          onClose={() => setTranslationField(null)}
+        />
+      )}
     </Modal>
   );
 }

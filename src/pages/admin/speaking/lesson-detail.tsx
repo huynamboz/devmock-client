@@ -11,6 +11,7 @@ import {
   Pencil,
   Trash2,
   Volume2,
+  Globe,
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import {
@@ -28,6 +29,7 @@ import {
 } from "@/services/speaking.service";
 import { ItemFormModal } from "@/components/admin/speaking/item-form-modal";
 import { DeleteItemModal } from "@/components/admin/speaking/delete-item-modal";
+import { TranslationDialog } from "@/components/admin/translation-dialog";
 
 export default function AdminSpeakingLessonDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +38,9 @@ export default function AdminSpeakingLessonDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedItem, setSelectedItem] = useState<SpeakingItem | null>(null);
+
+  // Translation dialog state
+  const [translationField, setTranslationField] = useState<string | null>(null);
 
   const {
     isOpen: isFormOpen,
@@ -155,10 +160,28 @@ export default function AdminSpeakingLessonDetailPage() {
               <h1 className="text-xl font-bold text-foreground">
                 {lesson.title}
               </h1>
+              <button
+                className="mt-0.5 flex items-center gap-1 text-xs text-primary hover:underline"
+                type="button"
+                onClick={() => setTranslationField("title")}
+              >
+                <Globe className="h-3 w-3" />
+                Translations
+              </button>
               {lesson.description && (
-                <p className="mt-1 text-sm text-default-500">
-                  {lesson.description}
-                </p>
+                <>
+                  <p className="mt-1 text-sm text-default-500">
+                    {lesson.description}
+                  </p>
+                  <button
+                    className="mt-0.5 flex items-center gap-1 text-xs text-primary hover:underline"
+                    type="button"
+                    onClick={() => setTranslationField("description")}
+                  >
+                    <Globe className="h-3 w-3" />
+                    Translations
+                  </button>
+                </>
               )}
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-default-100 px-2 py-0.5 text-[11px] font-semibold text-default-600">
@@ -256,14 +279,9 @@ export default function AdminSpeakingLessonDetailPage() {
                     <p className="font-medium text-foreground leading-snug">
                       {item.textOriginal}
                     </p>
-                    {item.phonetic && (
+                    {item.ipa && (
                       <p className="mt-0.5 font-mono text-xs text-default-400">
-                        /{item.phonetic}/
-                      </p>
-                    )}
-                    {item.textTranslation && (
-                      <p className="mt-1 text-sm text-default-500">
-                        {item.textTranslation}
+                        /{item.ipa}/
                       </p>
                     )}
                     {item.audioUrl && (
@@ -340,6 +358,23 @@ export default function AdminSpeakingLessonDetailPage() {
             onClose={onDeleteClose}
             onSuccess={loadLesson}
           />
+          {lesson && (
+            <TranslationDialog
+              entityId={id}
+              entityType="lesson"
+              field={translationField ?? ""}
+              isOpen={!!translationField}
+              multiline={translationField === "description"}
+              text={
+                translationField === "title"
+                  ? lesson.title
+                  : translationField === "description"
+                    ? lesson.description ?? ""
+                    : ""
+              }
+              onClose={() => setTranslationField(null)}
+            />
+          )}
         </>
       )}
     </div>

@@ -73,4 +73,23 @@ export const translationService = {
 
     return data;
   },
+
+  async bulkCreateTranslations(
+    body: CreateTranslationRequest[],
+  ): Promise<Translation[]> {
+    const { data } = await apiClient.post<Translation[]>(`${BASE}/bulk`, body);
+
+    return data;
+  },
+
+  async generateTranslations(
+    prompt: string,
+  ): Promise<{ lang: string; value: string }[]> {
+    const { data } = await apiClient.post<{ lang: string; value: string }[]>(
+      `${BASE}/generate`,
+      { prompt },
+    );
+
+    return data;
+  },
 };

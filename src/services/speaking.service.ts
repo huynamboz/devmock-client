@@ -62,9 +62,8 @@ export interface SpeakingItem {
   id: string;
   lessonId: string;
   textOriginal: string;
-  textTranslation: string | null;
   audioUrl: string | null;
-  phonetic: string | null;
+  ipa: string | null;
   orderIndex: number;
   lesson?: {
     id: string;
@@ -76,9 +75,8 @@ export interface SpeakingItem {
 export interface CreateItemRequest {
   lessonId: string;
   textOriginal: string;
-  textTranslation?: string | null;
   audioUrl?: string | null;
-  phonetic?: string | null;
+  ipa?: string | null;
   orderIndex?: number;
 }
 

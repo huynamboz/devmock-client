@@ -16,6 +16,7 @@ import AdminSpeakingTopicsPage from "./pages/admin/speaking/topics";
 import AdminSpeakingTopicDetailPage from "./pages/admin/speaking/topic-detail";
 import AdminSpeakingLessonDetailPage from "./pages/admin/speaking/lesson-detail";
 import AdminDevelopmentPage from "./pages/admin/development";
+import AdminSettingsPage from "./pages/admin/settings";
 
 import { PublicRoute } from "@/components/public-route";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -37,6 +38,7 @@ function App() {
           path="speaking/lessons/:id"
         />
         <Route element={<AdminDevelopmentPage />} path="dev" />
+        <Route element={<AdminSettingsPage />} path="settings" />
       </Route>
 
       {/* Protected Layout - chỉ check auth 1 lần */}
