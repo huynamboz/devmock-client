@@ -37,6 +37,7 @@ export function ItemFormModal({
 }: ItemFormModalProps) {
   const isEdit = !!item;
   const [textOriginal, setTextOriginal] = useState("");
+  const [explanation, setExplanation] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
   const [ipa, setIpa] = useState("");
   const [orderIndex, setOrderIndex] = useState(0);
@@ -49,6 +50,7 @@ export function ItemFormModal({
   useEffect(() => {
     if (isOpen) {
       setTextOriginal(item?.textOriginal ?? "");
+      setExplanation(item?.explanation ?? "");
       setAudioUrl(item?.audioUrl ?? "");
       setIpa(item?.ipa ?? "");
       setOrderIndex(item?.orderIndex ?? 0);
@@ -70,6 +72,7 @@ export function ItemFormModal({
       const body: CreateItemRequest = {
         lessonId: isEdit && item ? item.lessonId : lessonId,
         textOriginal: textOriginal.trim(),
+        explanation: explanation.trim() || null,
         audioUrl: audioUrl.trim() || null,
         ipa: ipa.trim() || null,
         orderIndex,
@@ -147,6 +150,27 @@ export function ItemFormModal({
               </button>
             )}
           </div>
+          <div>
+            <Textarea
+              label="Explanation"
+              maxRows={3}
+              minRows={1}
+              placeholder="e.g. Used as a greeting when meeting someone"
+              value={explanation}
+              variant="bordered"
+              onValueChange={(v) => setExplanation(v)}
+            />
+            {isEdit && item && (
+              <button
+                className="mt-1.5 flex items-center gap-1 text-xs text-primary hover:underline"
+                type="button"
+                onClick={() => setTranslationField("explanation")}
+              >
+                <Globe className="h-3 w-3" />
+                Translations
+              </button>
+            )}
+          </div>
           <Input
             label="IPA"
             placeholder="e.g. sin tʃaʊ, toj la nam"
@@ -188,8 +212,17 @@ export function ItemFormModal({
           entityType="item"
           field={translationField ?? ""}
           isOpen={!!translationField}
-          multiline={translationField === "textOriginal"}
-          text={translationField === "textOriginal" ? textOriginal : ""}
+          multiline={
+            translationField === "textOriginal" ||
+            translationField === "explanation"
+          }
+          text={
+            translationField === "textOriginal"
+              ? textOriginal
+              : translationField === "explanation"
+                ? explanation
+                : ""
+          }
           onClose={() => setTranslationField(null)}
         />
       )}

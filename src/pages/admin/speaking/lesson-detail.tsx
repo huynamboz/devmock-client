@@ -7,19 +7,24 @@ import {
   Mic,
   RefreshCw,
   Plus,
-  MoreHorizontal,
+  ListPlus,
   Pencil,
   Trash2,
   Volume2,
   Globe,
+  Wand2,
 } from "lucide-react";
+import { addToast } from "@heroui/toast";
 import { Button } from "@heroui/button";
 import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
+import { Tooltip } from "@heroui/tooltip";
 import { useDisclosure } from "@heroui/modal";
 
 import {
@@ -29,6 +34,7 @@ import {
 } from "@/services/speaking.service";
 import { ItemFormModal } from "@/components/admin/speaking/item-form-modal";
 import { DeleteItemModal } from "@/components/admin/speaking/delete-item-modal";
+import { BulkAddItemsModal } from "@/components/admin/speaking/bulk-add-items-modal";
 import { TranslationDialog } from "@/components/admin/translation-dialog";
 
 export default function AdminSpeakingLessonDetailPage() {
@@ -38,6 +44,10 @@ export default function AdminSpeakingLessonDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedItem, setSelectedItem] = useState<SpeakingItem | null>(null);
+
+  const [generatingAudioId, setGeneratingAudioId] = useState<string | null>(
+    null,
+  );
 
   // Translation dialog state
   const [translationField, setTranslationField] = useState<string | null>(null);
@@ -51,6 +61,11 @@ export default function AdminSpeakingLessonDetailPage() {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
     onClose: onDeleteClose,
+  } = useDisclosure();
+  const {
+    isOpen: isBulkOpen,
+    onOpen: onBulkOpen,
+    onClose: onBulkClose,
   } = useDisclosure();
 
   useEffect(() => {
@@ -83,6 +98,34 @@ export default function AdminSpeakingLessonDetailPage() {
   const handleEditItem = (item: SpeakingItem) => {
     setSelectedItem(item);
     onFormOpen();
+  };
+
+  const handleGenerateAudio = async (item: SpeakingItem) => {
+    try {
+      setGeneratingAudioId(item.id);
+      const { audioUrl } = await speakingService.generateAudio(
+        item.textOriginal,
+      );
+
+      await speakingService.updateItem(item.id, { audioUrl });
+      addToast({
+        title: "Audio generated",
+        description: "Audio has been generated and saved.",
+        color: "success",
+        variant: "flat",
+      });
+      loadLesson();
+    } catch (err) {
+      addToast({
+        title: "Failed to generate audio",
+        description:
+          err instanceof Error ? err.message : "Something went wrong.",
+        color: "danger",
+        variant: "flat",
+      });
+    } finally {
+      setGeneratingAudioId(null);
+    }
   };
 
   const handleDeleteItem = (item: SpeakingItem) => {
@@ -228,19 +271,32 @@ export default function AdminSpeakingLessonDetailPage() {
                 {sortedItems.length} item{sortedItems.length !== 1 && "s"}
               </p>
             </div>
-            <Button
-              className="font-medium"
-              color="primary"
-              radius="full"
-              size="sm"
-              startContent={<Plus className="h-4 w-4" />}
-              onPress={handleCreateItem}
-            >
-              Add Item
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                className="font-medium"
+                color="primary"
+                radius="full"
+                size="sm"
+                startContent={<ListPlus className="h-4 w-4" />}
+                variant="bordered"
+                onPress={onBulkOpen}
+              >
+                Add Multi
+              </Button>
+              <Button
+                className="font-medium"
+                color="primary"
+                radius="full"
+                size="sm"
+                startContent={<Plus className="h-4 w-4" />}
+                onPress={handleCreateItem}
+              >
+                Add Item
+              </Button>
+            </div>
           </div>
 
-          {/* Items list */}
+          {/* Items table */}
           {!sortedItems.length ? (
             <div className="flex min-h-[240px] flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-default-300 bg-white p-10 dark:bg-content1">
               <div className="rounded-2xl bg-default-100 p-4">
@@ -263,82 +319,169 @@ export default function AdminSpeakingLessonDetailPage() {
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
-              {sortedItems.map((item, index) => (
-                <div
-                  key={item.id}
-                  className="group flex items-start gap-3 rounded-xl border border-default-200 bg-white p-4 transition-colors hover:border-default-300 dark:bg-content1"
-                >
-                  {/* Order number */}
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-default-100 text-xs font-bold text-default-500 mt-0.5">
-                    {index + 1}
-                  </div>
-
-                  {/* Item content */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground leading-snug">
-                      {item.textOriginal}
-                    </p>
-                    {item.ipa && (
-                      <p className="mt-0.5 font-mono text-xs text-default-400">
-                        /{item.ipa}/
+            <Table
+              aria-label="Speaking items"
+              classNames={{
+                wrapper: "rounded-2xl border border-default-200 shadow-none",
+                tr: "hover:bg-default-100 transition-colors",
+              }}
+              removeWrapper={false}
+            >
+              <TableHeader>
+                <TableColumn className="w-12">#</TableColumn>
+                <TableColumn>Original Text</TableColumn>
+                <TableColumn>Explanation</TableColumn>
+                <TableColumn className="w-32">IPA</TableColumn>
+                <TableColumn className="w-20 text-center">Audio</TableColumn>
+                <TableColumn className="w-36">Created</TableColumn>
+                <TableColumn className="w-28 text-center">Actions</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {sortedItems.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <span className="text-xs font-bold text-default-400">
+                        {index + 1}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <p className="text-sm font-medium text-foreground">
+                        {item.textOriginal}
+                        {(item.translationCounts?.textOriginal ?? 0) > 0 && (
+                          <span className="ml-1.5 inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                            <Globe className="h-2.5 w-2.5" />
+                            {item.translationCounts!.textOriginal}
+                          </span>
+                        )}
                       </p>
-                    )}
-                    {item.audioUrl && (
-                      <a
-                        className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
-                        href={item.audioUrl}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        <Volume2 className="h-3 w-3" />
-                        Play audio
-                      </a>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <Button
-                        isIconOnly
-                        aria-label="Actions"
-                        radius="full"
-                        size="sm"
-                        variant="light"
-                      >
-                        <MoreHorizontal className="h-4 w-4 text-default-400" />
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      aria-label="Item actions"
-                      onAction={(key) => {
-                        if (key === "edit") {
-                          handleEditItem(item);
-                        } else if (key === "delete") {
-                          handleDeleteItem(item);
-                        }
-                      }}
-                    >
-                      <DropdownItem
-                        key="edit"
-                        startContent={<Pencil className="h-4 w-4" />}
-                      >
-                        Edit
-                      </DropdownItem>
-                      <DropdownItem
-                        key="delete"
-                        className="text-danger"
-                        color="danger"
-                        startContent={<Trash2 className="h-4 w-4" />}
-                      >
-                        Delete
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </div>
-              ))}
-            </div>
+                    </TableCell>
+                    <TableCell>
+                      {item.explanation ? (
+                        <p className="text-sm text-default-500 line-clamp-2">
+                          {item.explanation}
+                          {(item.translationCounts?.explanation ?? 0) > 0 && (
+                            <span className="ml-1.5 inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                              <Globe className="h-2.5 w-2.5" />
+                              {item.translationCounts!.explanation}
+                            </span>
+                          )}
+                        </p>
+                      ) : (
+                        <span className="text-xs text-default-300">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {item.ipa ? (
+                        <span className="font-mono text-xs text-default-400">
+                          /{item.ipa}/
+                        </span>
+                      ) : (
+                        <span className="text-xs text-default-300">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center">
+                        {item.audioUrl ? (
+                          <>
+                            <Tooltip content="Play audio">
+                              <Button
+                                isIconOnly
+                                aria-label="Play audio"
+                                radius="full"
+                                size="sm"
+                                variant="light"
+                                onPress={() => new Audio(item.audioUrl!).play()}
+                              >
+                                <Volume2 className="h-4 w-4 text-primary" />
+                              </Button>
+                            </Tooltip>
+                            <Tooltip content="Regenerate audio">
+                              <Button
+                                isIconOnly
+                                aria-label="Regenerate audio"
+                                isLoading={generatingAudioId === item.id}
+                                radius="full"
+                                size="sm"
+                                variant="light"
+                                onPress={() => handleGenerateAudio(item)}
+                              >
+                                <Wand2 className="h-3.5 w-3.5 text-warning" />
+                              </Button>
+                            </Tooltip>
+                          </>
+                        ) : (
+                          <Tooltip content="Generate audio">
+                            <Button
+                              isIconOnly
+                              aria-label="Generate audio"
+                              isLoading={generatingAudioId === item.id}
+                              radius="full"
+                              size="sm"
+                              variant="light"
+                              onPress={() => handleGenerateAudio(item)}
+                            >
+                              <Wand2 className="h-4 w-4 text-warning" />
+                            </Button>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs text-default-400">
+                        {new Date(item.createdAt).toLocaleDateString("vi-VN", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-0.5">
+                        <Tooltip content="Translations">
+                          <Button
+                            isIconOnly
+                            aria-label="Translations"
+                            radius="full"
+                            size="sm"
+                            variant="light"
+                            onPress={() => {
+                              setSelectedItem(item);
+                              setTranslationField("textOriginal");
+                            }}
+                          >
+                            <Globe className="h-3.5 w-3.5 text-primary" />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip content="Edit">
+                          <Button
+                            isIconOnly
+                            aria-label="Edit"
+                            radius="full"
+                            size="sm"
+                            variant="light"
+                            onPress={() => handleEditItem(item)}
+                          >
+                            <Pencil className="h-3.5 w-3.5 text-default-400" />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip color="danger" content="Delete">
+                          <Button
+                            isIconOnly
+                            aria-label="Delete"
+                            radius="full"
+                            size="sm"
+                            variant="light"
+                            onPress={() => handleDeleteItem(item)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-danger" />
+                          </Button>
+                        </Tooltip>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </>
       )}
@@ -358,21 +501,50 @@ export default function AdminSpeakingLessonDetailPage() {
             onClose={onDeleteClose}
             onSuccess={loadLesson}
           />
-          {lesson && (
+          <BulkAddItemsModal
+            isOpen={isBulkOpen}
+            lessonId={id}
+            startOrderIndex={sortedItems.length}
+            onClose={onBulkClose}
+            onSuccess={loadLesson}
+          />
+          {lesson && translationField && (
             <TranslationDialog
-              entityId={id}
-              entityType="lesson"
-              field={translationField ?? ""}
-              isOpen={!!translationField}
-              multiline={translationField === "description"}
+              isOpen
+              entityId={
+                (translationField === "textOriginal" ||
+                  translationField === "explanation") &&
+                selectedItem
+                  ? selectedItem.id
+                  : id
+              }
+              entityType={
+                translationField === "textOriginal" ||
+                translationField === "explanation"
+                  ? "item"
+                  : "lesson"
+              }
+              field={translationField}
+              multiline={
+                translationField === "description" ||
+                translationField === "textOriginal" ||
+                translationField === "explanation"
+              }
               text={
                 translationField === "title"
                   ? lesson.title
                   : translationField === "description"
                     ? (lesson.description ?? "")
-                    : ""
+                    : translationField === "textOriginal" && selectedItem
+                      ? selectedItem.textOriginal
+                      : translationField === "explanation" && selectedItem
+                        ? (selectedItem.explanation ?? "")
+                        : ""
               }
-              onClose={() => setTranslationField(null)}
+              onClose={() => {
+                setTranslationField(null);
+                setSelectedItem(null);
+              }}
             />
           )}
         </>

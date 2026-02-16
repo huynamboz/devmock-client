@@ -246,7 +246,7 @@ export function TranslationDialog({
       const template = promptSetting.value.prompt;
 
       // Build prompt: replace {languages} and {originalText}
-      const languageNames = missingLangs.map((l) => `"${l.name}"`).join(",");
+      const languageNames = missingLangs.map((l) => `"${l.code}"`).join(",");
       const prompt = template
         .replace("{languages}", languageNames)
         .replace("{originalText}", text);

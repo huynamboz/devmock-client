@@ -62,9 +62,15 @@ export interface SpeakingItem {
   id: string;
   lessonId: string;
   textOriginal: string;
+  explanation: string | null;
   audioUrl: string | null;
   ipa: string | null;
   orderIndex: number;
+  createdAt: string;
+  translationCounts?: {
+    textOriginal?: number;
+    explanation?: number;
+  };
   lesson?: {
     id: string;
     title: string;
@@ -75,12 +81,25 @@ export interface SpeakingItem {
 export interface CreateItemRequest {
   lessonId: string;
   textOriginal: string;
+  explanation?: string | null;
   audioUrl?: string | null;
   ipa?: string | null;
   orderIndex?: number;
 }
 
 export interface UpdateItemRequest extends Partial<CreateItemRequest> {}
+
+export interface BulkCreateItemsRequest {
+  lessonId: string;
+  items: {
+    textOriginal: string;
+    explanation?: string;
+    audioUrl?: string;
+    ipa?: string;
+    sourceLang?: string;
+    orderIndex?: number;
+  }[];
+}
 
 // --- Service ---
 
@@ -212,5 +231,23 @@ export const speakingService = {
 
   async deleteItem(id: string): Promise<void> {
     await apiClient.delete(`${ADMIN_BASE}/items/${id}`);
+  },
+
+  async generateAudio(textOriginal: string): Promise<{ audioUrl: string }> {
+    const { data } = await apiClient.post<{ audioUrl: string }>(
+      `${ADMIN_BASE}/items/generate-audio`,
+      { textOriginal },
+    );
+
+    return data;
+  },
+
+  async bulkCreateItems(body: BulkCreateItemsRequest): Promise<SpeakingItem[]> {
+    const { data } = await apiClient.post<SpeakingItem[]>(
+      `${ADMIN_BASE}/items/bulk`,
+      body,
+    );
+
+    return data;
   },
 };
